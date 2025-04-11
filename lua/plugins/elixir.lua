@@ -1,0 +1,3 @@
+return {
+	'mhanberg/elixir.nvim'
+}
