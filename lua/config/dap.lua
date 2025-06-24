@@ -1,5 +1,6 @@
 local dap = require("dap")
 
+dap.set_log_level('TRACE')
 -- Para Ruby on Rails (requiere tener instalado ruby-debug-ide/rdbg)
 dap.adapters.ruby = {
   type = 'executable',
@@ -21,11 +22,48 @@ dap.configurations.ruby = {
 -- Puede requerirse un adapter específico o integrarse con el servidor ElixirLS)
 dap.adapters.elixir = {
   type = "executable",
-  command = "path/to/elixir-debug-adapter",  -- Debes indicar la ruta correcta al adaptador de Elixir si lo tienes
+  command = vim.fn.stdpath("data") .. '/mason/packages/elixir-ls/debug_adapter.sh',
   args = {},
+  options = {
+    env = {
+      MIX_ENV = "test"  -- añadimos esta variable de entorno para mayor claridad
+    }
+  }
+}
+
+dap.adapters.mix_task = {
+  type = "executable",
+  command = vim.fn.stdpath("data") .. '/mason/packages/elixir-ls/debug_adapter.sh',
+  args = {}
 }
 
 dap.configurations.elixir = {
+  {
+    type = "mix_task",
+    name = "mix test",
+    task = 'test',
+    taskArgs = {"--trace"},
+    request = "launch",
+    startApps = true, -- for Phoenix projects
+    projectDir = "${workspaceFolder}",
+    requireFiles = {
+      "test/**/test_helper.exs",
+      "test/**/*_test.exs"
+    }
+  },
+  {
+    type = "mix_task",
+    name = "mix test current file",
+    task = "test",
+    taskArgs = {"${file}", "--trace"},
+    request = "launch",
+    startApps = true,
+    projectDir = "${workspaceFolder}",
+    requireFiles = {
+      "test/**/test_helper.exs",
+      "${file}"
+    }
+  },
   {
     type = "elixir",
     request = "launch",
@@ -34,7 +72,6 @@ dap.configurations.elixir = {
     cwd = vim.fn.getcwd(),
   },
 }
-
 -- Para Java (requiere tener configurado y ejecutándose un servidor de debug, por ejemplo con vscode-java-debug)
 dap.adapters.java = {
   type = 'server',

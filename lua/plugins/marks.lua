@@ -1,4 +1,4 @@
-return {
+ return {
   "chentoast/marks.nvim",
   event = "VeryLazy",
   opts = {},
@@ -40,4 +40,4 @@ return {
       mappings = {}
     }
   end
-}
+ }

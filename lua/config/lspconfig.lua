@@ -1,13 +1,13 @@
 local lspconfig = require("lspconfig")
 local mason_lspconfig = require("mason-lspconfig")
-require('java').setup()
+-- require('java').setup()
 -- Lista de servidores a instalar y configurar
 local servers = {
   "solargraph",     -- Ruby
   "elixirls",       -- Elixir
-  "nextls",
+ -- "nextls",
   "pyright",        -- Python
-  "jdtls",          -- Java
+  -- "jdtls",          -- Java
   "terraformls",    -- Terraform
   "yamlls",         -- YAML
 }
@@ -47,17 +47,18 @@ local server_configs = {
       },
     },
   },
-  nextls ={
-    cmd = {"nextls", "--stdio"},
-    init_options = {
-      extensions = {
-        credo = { enable = true }
-      },
-      experimental = {
-        completions = { enable = true }
-      }
-    }
-  },
+  -- nextls ={
+  --   cmd = {"nextls", "--stdio"},
+  --   spitfire = false, -- defaults to false
+  --   init_options = {
+  --     extensions = {
+  --       credo = { enable = true }
+  --     },
+  --     experimental = {
+  --       completions = { enable = true }
+  --     }
+  --   }
+  -- },
   lua_ls = {
     settings = {
       Lua = {
@@ -90,10 +91,12 @@ local server_configs = {
     },
   },
   elixirls = {
+    cmd = {"/usr/local/bin/elixir-ls"},
     settings = {
       elixirLS = {
         dialyzerEnabled = true,
         fetchDeps = false,
+        enableTestLenses = true,
         suggestSpecs = true,
       },
     },
