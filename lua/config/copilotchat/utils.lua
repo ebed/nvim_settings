@@ -49,6 +49,23 @@ function M.get_project_name()
   return vim.fn.fnamemodify(cwd, ':t')
 end
 
+function M.get_current_branch()
+  local handle = io.popen("git rev-parse --abbrev-ref HEAD")
+  local branch = handle:read("*a"):gsub("%s+", "")
+  handle:close()
+  return branch
+end
+
+-- Switch to branch (create if doesn't exist)
+function M.switch_or_create_branch(branch_name)
+  local current = M.get_current_branch()
+  if current == branch_name then return end
+  -- Try to checkout, if fails, create
+  local checkout = os.execute(string.format("git checkout %q", branch_name))
+  if checkout ~= 0 then
+    os.execute(string.format("git checkout -b %q", branch_name))
+  end
+end
 
 function M.get_git_diff()
   -- Get git diff as string
