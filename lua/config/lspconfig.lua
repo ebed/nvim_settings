@@ -91,7 +91,7 @@ local server_configs = {
     },
   },
   elixirls = {
-    cmd = {"/usr/local/bin/elixir-ls"},
+    cmd = {"/opt/homebrew/bin/elixir-ls"},
     settings = {
       elixirLS = {
         dialyzerEnabled = true,

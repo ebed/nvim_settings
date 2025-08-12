@@ -1,6 +1,6 @@
 local cmp = require("cmp")
 local luasnip = require("luasnip")
-local copilot = require 'copilot.suggestion'
+-- local copilot = require 'copilot.suggestion'
 
 cmp.setup({
     snippet = {
@@ -10,8 +10,10 @@ cmp.setup({
     },
     mapping = {
         ['<Tab>'] = cmp.mapping(function(fallback)
-                        if copilot.is_visible() then
-                            copilot.accept()
+                        -- if copilot.is_visible() then
+                        --     copilot.accept()
+           if false then 
+                print("Copilot off")
                         elseif cmp.visible() then
                             local entry = cmp.get_selected_entry()
                             if not entry then
@@ -34,18 +36,21 @@ cmp.setup({
                 fallback()
             end
         end, { "i", "s" }),
-      ['<C-.>'] = cmp.mapping(function()
-          if copilot.is_visible() then
-              copilot.next()
-          end
-      end),
-      ['<C-,>'] = cmp.mapping(function()
-          if copilot.is_visible() then
-              copilot.prev()
-          end
-      end),
+      -- ['<C-.>'] = cmp.mapping(function()
+      --     if copilot.is_visible() then
+      --         copilot.next()
+      --     end
+      -- end),
+      -- ['<C-,>'] = cmp.mapping(function()
+      --     if copilot.is_visible() then
+      --         copilot.prev()
+      --     end
+      -- end),
     },
     sources = {
+        per_filetype = {
+          codecompanion = { "codecompanion" },
+        },
         { name = "nvim_lsp" },
         { name = "luasnip" },
         { name = "buffer" },
