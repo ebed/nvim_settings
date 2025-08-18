@@ -67,12 +67,11 @@ function M.switch_or_create_branch(branch_name)
   end
 end
 
-function M.get_git_diff()
-  -- Get git diff as string
-  local handle = io.popen("git diff")
-  local result = handle:read("*a")
+function M.get_git_diff_main_head()
+  local handle = io.popen("git diff main..HEAD")
+  local diff = handle:read("*a")
   handle:close()
-  return result
+  return diff
 end
 
 function M.load_template(filename)
@@ -84,26 +83,76 @@ function M.load_template(filename)
   return content
 end
 
-function M.llm_call(prompt)
-  -- Aquí deberías implementar la llamada al LLM (OpenAI, CopilotChat, etc.)
-  -- Por ahora, solo retorna el prompt para pruebas
-  return prompt
-end
 
 function M.git_add_commit_push(message)
-  -- Ejecuta comandos git (add, commit, push) usando el mensaje
-  os.execute("git add .")
-  os.execute(string.format("git commit -m %q", message))
-  os.execute("git push")
+  local log = {}
+
+  -- Run git add
+  local handle_add = io.popen("git add . 2>&1")
+  table.insert(log, "=== git add . ===")
+  table.insert(log, handle_add:read("*a"))
+  handle_add:close()
+
+  -- Run git commit
+  local handle_commit = io.popen(string.format("git commit -m %q 2>&1", message))
+  table.insert(log, "=== git commit ===")
+  table.insert(log, handle_commit:read("*a"))
+  handle_commit:close()
+
+  -- Run git push
+  local handle_push = io.popen("git push 2>&1")
+  table.insert(log, "=== git push ===")
+  table.insert(log, handle_push:read("*a"))
+  handle_push:close()
+
+  -- Show all logs in panel
+  M.show_log_in_panel(table.concat(log, "\n"))
 end
 
 function M.create_pull_request(message)
-  -- Aquí podrías usar la CLI de GitHub o una integración con la API
-  -- Por ejemplo, usando gh CLI:
-  os.execute(string.format("gh pr create --title 'Auto PR' --body %q", message))
+  local log = {}
+
+  -- Run gh pr create
+  local cmd = string.format("gh pr create --title 'Auto PR' --body %q 2>&1", message)
+  local handle_pr = io.popen(cmd)
+  table.insert(log, "=== gh pr create ===")
+  table.insert(log, handle_pr:read("*a"))
+  handle_pr:close()
+
+  -- Show PR creation log in panel
+  M.show_log_in_panel(table.concat(log, "\n"))
 end
 
 
+function M.show_log_in_panel(log_text)
+  -- Create or reuse a buffer for the log panel
+  local buf_name = "CopilotChatLog"
+  local buf = nil
+  -- Try to find existing buffer
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_get_name(b) == buf_name then
+      buf = b
+      break
+    end
+  end
+  -- If not found, create new buffer
+  if not buf then
+    buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_name(buf, buf_name)
+    vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+    vim.api.nvim_buf_set_option(buf, "modifiable", false)
+    vim.api.nvim_buf_set_option(buf, "readonly", true)
+  end
+  -- Set log text
+  vim.api.nvim_buf_set_option(buf, "modifiable", true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(log_text, "\n"))
+  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  -- Open split below and set buffer
+  vim.cmd("botright split")
+  vim.api.nvim_win_set_buf(0, buf)
+  vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { noremap = true, silent = true })
+  vim.cmd("resize 15")
+end
 
 
 return M
