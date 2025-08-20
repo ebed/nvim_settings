@@ -64,17 +64,17 @@ function M._create_pr_flow(branch_name)
 end
 
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-  callback = function()
-    local current_branch = utils.get_current_branch()
-    if current_branch == "main" or current_branch == "master" then
-      require("config.copilotchat.agent_pr").start_development()
-    end
-  end,
-  group = vim.api.nvim_create_augroup("CopilotChatBranchGuard", { clear = true }),
-  desc = "Prompt for new branch if saving on main/master",
-})
-
+-- vim.api.nvim_create_autocmd("BufWritePost", {
+--   callback = function()
+--     local current_branch = utils.get_current_branch()
+--     if current_branch == "main" or current_branch == "master" then
+--       require("config.copilotchat.agent_pr").start_development()
+--     end
+--   end,
+--   group = vim.api.nvim_create_augroup("CopilotChatBranchGuard", { clear = true }),
+--   desc = "Prompt for new branch if saving on main/master",
+-- })
+--
 
 
 return M

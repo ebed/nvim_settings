@@ -19,6 +19,28 @@ return {
           hide_dotfiles = false,
           hide_gitignored = true,
         },
+        follow_current_file = {
+          enabled = true, -- Reveal the current file in the tree
+        },
+      },
+    components = {
+      name = function(config, node, state)
+        return {
+          text = node.name,
+          highlight = config.highlight or "NeoTreeFileName",
+        }
+      end,
+      -- No agregues components de fecha, tamaño, etc.
+    },
+    renderers = {
+      file = {
+        { "icon" },
+        { "name" },
+      },
+      directory = {
+        { "icon" },
+        { "name" },
+      },
       },
       window = {
         mappings = {
@@ -32,6 +54,14 @@ return {
           },
         }
       }
+    })
+
+    vim.api.nvim_set_hl(0, "NeoTreeFileNameOpened", { fg = "#FFD700", bold = true })
+    vim.api.nvim_create_autocmd("VimEnter", {
+      callback = function()
+        require("neo-tree.command").execute({ toggle = true, dir = vim.loop.cwd() })
+        -- vim.cmd("Alpha")
+      end,
     })
   end
 }

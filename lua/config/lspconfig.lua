@@ -1,5 +1,17 @@
+pcall(require, "java") -- Esto asegura que el módulo esté cargado
+
+local home = os.getenv("HOME")
 local lspconfig = require("lspconfig")
 local mason_lspconfig = require("mason-lspconfig")
+local lombok_jar = home .. "/.local/share/nvim/mason/packages/jdtls/lombok.jar"
+local config_dir = "/Users/ralbertomerinocolipe/.cache/jdtls/config"
+local workspace_dir = "/Users/ralbertomerinocolipe/.cache/jdtls/workspace"
+local mason_path = vim.fn.stdpath("data") .. "/mason"
+local bundles = {
+  mason_path .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin.jar",
+  mason_path .. "/share/java-test/*.jar",
+}
+-- local lombok_jar = home .. "/workspaces/utils/lombok-edge.jar"
 -- require('java').setup()
 -- Lista de servidores a instalar y configurar
 local servers = {
@@ -18,6 +30,16 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 capabilities.textDocument.completion.completionItem.resolveSupport = {
   properties = { "documentation", "detail", "additionalTextEdits" }
 }
+capabilities.textDocument.codeAction = {
+  dynamicRegistration = false,
+  codeActionLiteralSupport = {
+    codeActionKind = {
+      valueSet = {
+        "", "quickfix", "refactor", "refactor.extract", "refactor.inline", "refactor.rewrite", "source", "source.organizeImports"
+      }
+    }
+  }
+}
 
 -- Función común para configurar keymaps al adjuntar un cliente LSP
 local function on_attach(_, bufnr)
@@ -30,9 +52,64 @@ local function on_attach(_, bufnr)
   vim.keymap.set("n", "<leader>lfm", function() vim.lsp.buf.format { async = true } end, opts)
 end
 
+lspconfig.jdtls.setup({
+    cmd = {
+        "jdtls",
+        '-Djava.home=/Users/ralbertomerinocolipe/.asdf/installs/java/zulu-21.42.19/zulu-21.jdk/Contents/Home',
+        "-javaagent:" .. lombok_jar,
+        "-configuration", config_dir,
+        "-data", workspace_dir,
+    },
+  -- init_options = {
+  --   bundles = bundles,
+  -- },
+  -- filetypes = { 'java' },
+  root_dir = require('lspconfig.util').root_pattern('pom.xml', 'build.gradle', '.git'),
+  -- handlers = {
+  --   -- By assigning an empty function, you can remove the notifications
+  --   -- printed to the cmd
+  --   ["$/progress"] = function(_, result, ctx) end,
+  -- },
+  })
+
+
+--   capabilities = capabilities,
+--   settings = {
+--     java = {
+--       signatureHelp = { enabled = true },
+--       contentProvider = { preferred = 'fernflower' },
+--       completion = {
+--         favoriteStaticMembers = {
+--           "org.hamcrest.MatcherAssert.assertThat",
+--           "org.hamcrest.Matchers.*",
+--           "org.hamcrest.CoreMatchers.*",
+--           "org.junit.jupiter.api.Assertions.*",
+--           "java.util.Objects.requireNonNull",
+--           "java.util.Objects.requireNonNullElse",
+--           "org.mockito.Mockito.*"
+--         }
+--       },
+--       sources = {
+--         organizeImports = {
+--           starThreshold = 9999,
+--           staticStarThreshold = 9999,
+--         },
+--       },
+--       codeGeneration = {
+--         toString = {
+--           template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}"
+--         }
+--       }
+--     }
+--   }
+-- }
+
+-- lspconfig["spring-boot-tools"].setup {
+--   filetypes = { "yaml", "jproperties" },
+-- }
 -- Configuración de Mason para instalar servidores automáticamente
 mason_lspconfig.setup({
-  ensure_installed = servers,
+  ensure_installed = servers
 })
 
 -- Configuración específica para cada servidor
@@ -47,6 +124,9 @@ local server_configs = {
       },
     },
   },
+  -- spring_boot = {
+  --  filetypes = { "yaml", "jproperties" },
+  -- },
   -- nextls ={
   --   cmd = {"nextls", "--stdio"},
   --   spitfire = false, -- defaults to false
@@ -104,6 +184,7 @@ local server_configs = {
 }
 
 vim.lsp.log.set_level(vim.log.levels.OFF)
+-- vim.lsp.log.set_level(vim.log.levels.DEBUG)
 -- Configuración genérica para todos los servidores
 for _, server in ipairs(servers) do
   local opts = {
