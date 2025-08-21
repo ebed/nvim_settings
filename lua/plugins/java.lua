@@ -72,5 +72,11 @@ require('java').setup({
   }, 
       log_path = "/tmp/nvim-java.log", -- ruta donde quieres el log
 })
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    vim.cmd("LspStop jdtls")
+  end,
+})
   end
 }
