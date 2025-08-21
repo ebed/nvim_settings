@@ -21,10 +21,15 @@ return {
       vim.api.nvim_set_hl(0, 'CopilotChatSeparator', { fg = '#374151' })
 
       -- Autocmd for context synthesis
-      vim.api.nvim_create_autocmd("BufWinLeave", {
-        pattern = "*copilot-chat*",
-        callback = synthesize.on_buf_leave,
-      })
+local function on_copilot_chat_buf_leave(args)
+  pcall(context.on_buf_leave, args)
+  -- pcall(synthesize.on_buf_leave, args)
+end
+
+vim.api.nvim_create_autocmd("BufWinLeave", {
+  pattern = "*copilot-chat*",
+  callback = on_copilot_chat_buf_leave,
+})
     end,
   }
 }
