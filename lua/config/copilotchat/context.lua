@@ -1,4 +1,4 @@
--- Context-related functions for CopilotChat
+-- Context-related functions for CopilotChatcopiconte
 local utils = require("config.copilotchat.utils")
 local CopilotChat = require("CopilotChat") -- Import required module
 local M = {}
@@ -245,6 +245,10 @@ end
 
 ---
 
+Es importante que definas una lista de tareas para ordenar el trabajo del ticket e ir registrando avances,
+y cada vez que se avance, identifique que tareas fueron cerradas. Si se envia una lista, esta se actualizará con 
+la informacion actualizada. 
+
 **Este contexto se mantendrá abierto hasta que la rama sea mergeada a main.**
 ]], global_context, ticket, branch, requirement, jira_link, diff)
 
@@ -293,6 +297,9 @@ function M.enrich_and_save_prompt(ticket, req_path, synth_path, extra_info)
 %s
 
 ---
+Es importante que definas una lista de tareas para ordenar el trabajo del ticket e ir registrando avances,
+y cada vez que se avance, identifique que tareas fueron cerradas. Si se envia una lista, esta se actualizará con 
+la informacion actualizada. 
 Este contexto se mantendrá abierto hasta que la rama sea mergeada a main.
 ]], global_context, ticket, branch, jira_link, requirement, diff, extra_info.tasks or "", extra_info.issues or "")
 
