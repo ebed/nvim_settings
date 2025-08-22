@@ -56,12 +56,12 @@ return {
       }
     })
 
-    vim.api.nvim_set_hl(0, "NeoTreeFileNameOpened", { fg = "#FFD700", bold = true })
-    vim.api.nvim_create_autocmd("VimEnter", {
-      callback = function()
-        require("neo-tree.command").execute({ toggle = true, dir = vim.loop.cwd() })
-        -- vim.cmd("Alpha")
-      end,
-    })
+    -- vim.api.nvim_set_hl(0, "NeoTreeFileNameOpened", { fg = "#FFD700", bold = true })
+    -- vim.api.nvim_create_autocmd("VimEnter", {
+    --   callback = function()
+    --     require("neo-tree.command").execute({ toggle = true, dir = vim.loop.cwd() })
+    --     -- vim.cmd("Alpha")
+    --   end,
+    -- })
   end
 }

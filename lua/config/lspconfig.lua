@@ -60,6 +60,17 @@ lspconfig.jdtls.setup({
         "-configuration", config_dir,
         "-data", workspace_dir,
     },
+  settings = {
+    java = {
+      autobuild = { enabled = false },
+      referencesCodeLens = { enabled = false },
+      implementationsCodeLens = { enabled = false },
+      checkstyle = { enabled = false },
+      signatureHelp = { enabled = true },
+      format = { enabled = false },
+      contentProvider = { preferred = "fernflower" },
+    },
+  },
   -- init_options = {
   --   bundles = bundles,
   -- },
@@ -183,8 +194,8 @@ local server_configs = {
   },
 }
 
-vim.lsp.log.set_level(vim.log.levels.OFF)
--- vim.lsp.log.set_level(vim.log.levels.DEBUG)
+-- vim.lsp.log.set_level(vim.log.levels.OFF)
+vim.lsp.log.set_level(vim.log.levels.DEBUG)
 -- Configuración genérica para todos los servidores
 for _, server in ipairs(servers) do
   local opts = {

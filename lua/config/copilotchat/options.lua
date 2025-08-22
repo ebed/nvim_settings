@@ -22,8 +22,8 @@ return {
       remember_as_sticky = true,
       window = {
         layout = "float",
-        width = 100,
-        height = 80,
+        width = 150,
+        height = 50,
         border = "rounded",
         title = "🤖 AI Assistant",
         zindex = 100,

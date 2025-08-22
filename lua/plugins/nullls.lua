@@ -14,10 +14,10 @@ return {
         null_ls.builtins.formatting.mix,
 
         -- Java
-        null_ls.builtins.diagnostics.checkstyle.with({
-          extra_args = { "-c", "/Users/ralbertomerinocolipe/workspaces/checkstyle.xml" },
-          filetypes = { "java" },
-        }),
+        -- null_ls.builtins.diagnostics.checkstyle.with({
+        --   extra_args = { "-c", "/Users/ralbertomerinocolipe/workspaces/checkstyle.xml" },
+        --   filetypes = { "java" },
+        -- }),
         null_ls.builtins.formatting.google_java_format,
         -- Scala (scalafmt)
         null_ls.builtins.formatting.scalafmt,
