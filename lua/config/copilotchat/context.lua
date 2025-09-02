@@ -64,6 +64,7 @@ Mantén este contexto para futuras consultas.
 end
       -- Prompt inicial para análisis de contexto de proyecto
       function M.project_context_prompt()
+        print("project_context_prompt called", debug.traceback())
         local project_name = utils.get_project_name() -- Correct usage
         local context_dir = utils.get_context_dir() -- Correct usage
         CopilotChat.open()
@@ -197,6 +198,7 @@ end
 
 -- Función principal para generar síntesis de ticket
 function M.ticket_context_prompt()
+        print("ticket_context_prompt called", debug.traceback())
   local branch = M.get_current_branch()
   local ticket = M.extract_ticket_from_branch(branch)
   if not ticket then
