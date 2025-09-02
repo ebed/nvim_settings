@@ -81,9 +81,23 @@ function M.get_pr_description()
   return desc
 end
 
+function M.get_default_branch()
+  local handle = io.popen("git remote show origin | grep 'HEAD branch' | awk '{print $3}'")
+  local branch = handle:read("*a")
+  handle:close()
+  branch = branch and branch:gsub("%s+", "")
+  if branch == "" then
+    branch = "main" -- fallback
+  end
+  return branch
+end
 -- Get diff with origin/main
 function M.get_diff()
-  local handle = io.popen('git diff origin/main..HEAD')
+
+  local base = M.get_default_branch()
+  print(base)
+  local diff_cmd = string.format("git diff origin/%s...HEAD", base)
+  local handle = io.popen(diff_cmd)
   local diff = handle:read("*a")
   handle:close()
   return diff or ""
@@ -96,7 +110,7 @@ function M.generate_pr_title(callback)
   local diff = M.get_diff()
   local prompt = "Generate a concise, clear Pull Request title (max 60 characters, no extra text, no headings, just the title itself)."
   if ticket then
-    prompt = prompt .. " The branch is associated with ticket " .. ticket .. ". Include the ticket in the title."
+    prompt = prompt .. " The branch is associated with ticket " .. ticket .. ". Include the ticket in the title like TICKET - name"
   end
   prompt = prompt .. "\n\nDiff:\n" .. diff
 
@@ -223,8 +237,9 @@ Eres un asistente experto en documentación de Pull Requests.
 Analiza los siguientes cambios y la descripción actual del PR.
 - Si corresponde, agrega diagramas relevantes usando mermaid.
 - Si aplica, incluye shapes y/o messages para clarificar el flujo o arquitectura.
-- Mejora la descripción del PR agregando contexto relevante, pero manteniendo lo existente.
+- Mejora la descripción del PR actual agregando contexto relevante, pero manteniendo lo existente a menos que sea algo que ya no aplica.
 - Devuelve el texto completo de la nueva descripción, listo para reemplazar el cuerpo del PR.
+- Si hay elementos que no aplican ya en el PR, eliminalos de la descripcion.
 No incluyas encabezados ni texto adicional, solo la nueva descripción.
 
 Descripción actual:

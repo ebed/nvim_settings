@@ -40,3 +40,28 @@
 -- else
 --   vim.notify('No Java project root found!', vim.log.levels.WARN)
 -- end
+
+vim.api.nvim_create_autocmd("BufNewFile", {
+  pattern = "*.java",
+  callback = function()
+    -- Espera a que el LSP esté listo
+    vim.defer_fn(function()
+      -- Llama a la code action de nvim-java si está disponible
+      vim.lsp.buf.code_action({
+        context = {
+          only = { "source.create_class" }, -- Ajusta según el nombre de la acción de nvim-java
+        }
+      })
+    end, 500) -- Espera 500ms para asegurar que el LSP esté listo
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.java",
+  callback = function()
+    vim.lsp.buf.code_action({
+      context = { only = { "source.organizeImports" } },
+      apply = true, 
+    })
+  end,
+})

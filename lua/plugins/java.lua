@@ -1,5 +1,9 @@
 local home = os.getenv("HOME")
 local jdk21 = home .. "/.asdf/installs/java/zulu-21.42.19"
+local lombok_jar = home .. "/workspaces/utils/lombok.jar"
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local config_dir = home .. "/.cache/jdtls/config"
+local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
 -- local lombok_jar = home .. "/workspaces/utils/lombok.jar"
 return {
   'nvim-java/nvim-java',
@@ -9,7 +13,7 @@ require('java').setup({
  
   spring_boot_tools = {
     enable = true,
-    version = '1.55.1',
+    version = '1.59.0',
   },
 
   jdk = {
@@ -17,9 +21,22 @@ require('java').setup({
     auto_install = false,
     version = '21.0.7',
   },
-  -- jvm_args = {
-  --   "-javaagent:" .. lombok_jar,
-  -- },
+  jvm_args = {
+        '-Djava.home=/Users/ralbertomerinocolipe/.asdf/installs/java/zulu-21.42.19/zulu-21.jdk/Contents/Home',
+        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+        "-Dosgi.bundles.defaultStartLevel=4",
+        "-Declipse.product=org.eclipse.jdt.ls.core.product",
+        "-Dlog.protocol=false",
+        "-Dlog.level=ERROR",
+        "-Xms1g",
+        "-Xmx2g",
+        "--add-modules=ALL-SYSTEM",
+        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        "-javaagent:" .. lombok_jar,
+        "-configuration", config_dir,
+        "-data", workspace_dir,
+  },
 
   notifications = {
     -- enable 'Configuring DAP' & 'DAP configured' messages on start up
@@ -27,15 +44,25 @@ require('java').setup({
   },
     java = {
       configuration = {
-        runtimes = {
-          {
-            name = "JavaSE-21",
-            path = jdk21,
-            default = true,
+        autobuild = { enabled = false },
+        referencesCodeLens = { enabled = false },
+        implementationsCodeLens = { enabled = false },
+        checkstyle = { enabled = false },
+        signatureHelp = { enabled = true },
+        format = { enabled = false },
+        project = {
+          importOnFirstTime = "automatic"
+        },
+        contentProvider = { preferred = "fernflower" },
+          runtimes = {
+            {
+              name = "JavaSE-21",
+              path = jdk21,
+              default = true,
+            }
           }
         }
-      }
-  },
+    },
   --
   -- We do multiple verifications to make sure things are in place to run this
   -- plugin
@@ -65,7 +92,6 @@ require('java').setup({
 
   mason = {
     -- These mason registries will be prepended to the existing mason
-    -- configuration
     registries = {
       'github:nvim-java/mason-registry',
     },

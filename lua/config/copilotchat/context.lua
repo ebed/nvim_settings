@@ -6,7 +6,7 @@ local M = {}
 
 
        function M.load_context_as_prompt()
-        local context_path = context_dir .. get_project_name() .. "_synthesis.md"
+        local context_path = context_dir .. utils.get_project_name() .. "_synthesis.md"
         if vim.fn.filereadable(context_path) == 1 then
           local lines = {}
           for line in io.lines(context_path) do
@@ -112,9 +112,17 @@ end
       end
 
 -- Extrae el ticket del nombre de la rama (ej: feature/PD-1234-foo)
-function M.extract_ticket_from_branch(branch)
-  local ticket = branch:match("([A-Z]+%-%d+)")
-  return ticket
+function M.extract_ticket_name()
+  local branch = M.get_current_branch()
+  local project_name = utils.get_project_name()
+  local ticket = branch and branch:match("([A-Z]+%-%d+)") or nil
+  if ticket and ticket ~= "" then
+    return ticket
+  elseif branch and branch ~= "" then
+    return project_name .. "-" .. string.sub(branch, 1, 5)
+  else
+    return project_name
+  end
 end
 
 -- Obtiene el nombre de la rama actual
@@ -144,13 +152,17 @@ function M.get_or_ask_requirement(ticket)
   local context_dir = utils.get_context_dir()
   local req_path = context_dir .. ticket .. "_requirement.txt"
   -- Si ya existe, lo lee
+  --
   local f = io.open(req_path, "r")
   if f then
-    local content = f:read("*a")
-    f:close()
-    return content
+    local requirement = utils.get_multiline_input("Requirement:")
+    if requirement == "" then
+      print("Requirement is required.")
+      return
+    end
+    return requirement
   end
-  local jira_link = get_jira_link(ticket)
+  local jira_link = M.get_jira_link(ticket)
 
 vim.fn.jobstart({ "open", jira_link }, { detach = true })
   -- Si no existe, solicita al usuario que lo pegue
@@ -199,8 +211,9 @@ end
 -- Función principal para generar síntesis de ticket
 function M.ticket_context_prompt()
         print("ticket_context_prompt called", debug.traceback())
+
   local branch = M.get_current_branch()
-  local ticket = M.extract_ticket_from_branch(branch)
+  local ticket = M.extract_ticket_name()
   if not ticket then
     vim.notify("No se pudo identificar el ticket en la rama: " .. branch)
     return
@@ -215,18 +228,11 @@ function M.ticket_context_prompt()
     vim.notify("Contexto del ticket cargado desde: " .. synth_path)
     return
   end
-local requirement = M.get_or_ask_requirement(ticket)
-if not requirement then
-  vim.notify("Reintenta el comando después de guardar el requerimiento.")
-  return
-end
   local jira_link = M.get_jira_link(ticket)
   local context_dir = utils.get_context_dir()
 
   -- Puedes agregar aquí lógica para obtener diff, archivos cambiados, etc.
-  local diff_handle = io.popen("git diff --name-status origin/main..HEAD")
-  local diff = diff_handle and diff_handle:read("*a") or ""
-  if diff_handle then diff_handle:close() end
+  local diff = M.get_diff_for_ticket() 
 
 local global_context = M.get_global_context()
 if not global_context or global_context == "" then
@@ -250,6 +256,8 @@ end
 Es importante que definas una lista de tareas para ordenar el trabajo del ticket e ir registrando avances,
 y cada vez que se avance, identifique que tareas fueron cerradas. Si se envia una lista, esta se actualizará con 
 la informacion actualizada. 
+Las tareas mantenlas como una lista con checks, un nombre y la descripcion de lo que se debe hacer en resumen, numerando la tarea para poder
+indicar rapidamente si hago una referencia a esta. 
 
 **Este contexto se mantendrá abierto hasta que la rama sea mergeada a main.**
 ]], global_context, ticket, branch, requirement, jira_link, diff)
@@ -262,6 +270,15 @@ la informacion actualizada.
   CopilotChat.ask(synthesis)
 end
 
+function M.get_diff_for_ticket()
+  local diff_handle = io.popen("git diff --name-status origin/main..HEAD")
+  local diff = diff_handle and diff_handle:read("*a") or ""
+  if diff_handle then
+    diff_handle:close()
+    return
+  end
+  return diff
+end
 
 function M.enrich_and_save_prompt(ticket, req_path, synth_path, extra_info)
 
@@ -302,6 +319,8 @@ function M.enrich_and_save_prompt(ticket, req_path, synth_path, extra_info)
 Es importante que definas una lista de tareas para ordenar el trabajo del ticket e ir registrando avances,
 y cada vez que se avance, identifique que tareas fueron cerradas. Si se envia una lista, esta se actualizará con 
 la informacion actualizada. 
+Las tareas mantenlas como una lista con checks, un nombre y la descripcion de lo que se debe hacer en resumen, numerando la tarea para poder
+indicar rapidamente si hago una referencia a esta. 
 Este contexto se mantendrá abierto hasta que la rama sea mergeada a main.
 ]], global_context, ticket, branch, jira_link, requirement, diff, extra_info.tasks or "", extra_info.issues or "")
 
@@ -317,8 +336,7 @@ end
 
 
 function M.on_buf_leave(args)
-    local branch = get_current_branch()
-    local ticket = extract_ticket_from_branch(branch)
+    local ticket = M.extract_ticket_name()
     local context_dir = utils.get_context_dir()
     local req_path = context_dir .. ticket .. "_requirement.txt"
     local synth_path = context_dir .. ticket .. "_synthesis.md"

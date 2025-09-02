@@ -12,6 +12,8 @@ require("config.copilotchat")
 
 vim.cmd "autocmd User TelescopePreviewerLoaded setlocal number"
 vim.g.loaded_perl_provider = 0
+vim.opt.autoindent = true
+vim.opt.smartindent = true
 
 
 vim.api.nvim_create_autocmd("FileType",  {

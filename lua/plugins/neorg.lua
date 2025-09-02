@@ -10,7 +10,9 @@
             ["core.dirman"] = {
               config = {
                 workspaces = {
-                  notes = "~/notes",
+                  notes = "~/workspaces/personal/neorg/notes",
+                  estudios = "~/workspaces/personal/neorg/estudios/",
+                  proyectos = "~/workspaces/personal/neorg/proyectos/",
                 },
                 default_workspace = "notes",
               },
