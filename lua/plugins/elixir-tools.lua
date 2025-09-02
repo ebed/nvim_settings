@@ -8,9 +8,6 @@ return {
 
     -- Common function for keybinding setup
     local function setup_elixir_keymaps(bufnr)
-      vim.keymap.set("n", "<space>Efp", ":ElixirFromPipe<cr>", { buffer = bufnr, noremap = true })
-      vim.keymap.set("n", "<space>Etp", ":ElixirToPipe<cr>", { buffer = bufnr, noremap = true })
-      vim.keymap.set("v", "<space>Eem", ":ElixirExpandMacro<cr>", { buffer = bufnr, noremap = true })
     end
 
     elixir.setup {

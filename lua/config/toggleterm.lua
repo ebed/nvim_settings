@@ -32,4 +32,3 @@ end
 vim.api.nvim_create_user_command('KafkaConsume', _KAFKA_CONSUME, {})
 
 -- Keymapping para consumir mensajes
-vim.keymap.set('n', '<leader>kc', ':KafkaConsume<CR>', {silent = true, desc = 'Consume Kafka Topic'})

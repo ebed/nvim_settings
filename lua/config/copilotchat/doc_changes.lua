@@ -87,9 +87,27 @@ local function process_files_serially(files, idx)
     process_files_serially(files, idx + 1)
     return
   end
-  local prompt = "Generate only the documentation comment (/** ... */) for the following changes in " .. file .. ". " ..
-                 "Do not include any code, file paths, or markdown code blocks. " ..
-                 "Return only the documentation comment, nothing else.\n\n" .. diff
+  -- Detect language and doc style
+  local function get_doc_instructions(file)
+    local ext = file:match("^.+(%..+)$")
+    if ext == ".java" then
+      return "Use JavaDoc format (/** ... */) for classes, methods, and functions."
+    elseif ext == ".ex" or ext == ".exs" then
+      return "Use Elixir @doc or @moduledoc attributes for modules and functions."
+    elseif ext == ".rb" then
+      return "Use YARD format (# @param, # @return, etc.) as Ruby documentation above methods and classes."
+    elseif ext == ".dockerfile" or file:lower():find("dockerfile") then
+      return "Use comments (# ...) to document each Docker instruction changed."
+    else
+      return "Use the standard documentation comment format for this language."
+    end
+ end
+ local doc_instructions = get_doc_instructions(file)
+ local prompt = "For the following changes in " .. file .. ":\n" ..
+   "- " .. doc_instructions .. "\n" ..
+   "- Place the documentation immediately above the class, method, or function definition (never above the package statement).\n" ..
+   "- Do not include any code, file paths, or markdown code blocks.\n" ..
+   "- Return only the documentation comments, nothing else.\n\n" .. diff
   log("Prompt for file: " .. file)
   log(prompt)
   CopilotChat.ask(prompt, {

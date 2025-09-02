@@ -9,24 +9,24 @@ cmp.setup({
         end,
     },
     mapping = {
-        ['<Tab>'] = cmp.mapping(function(fallback)
-                        -- if copilot.is_visible() then
-                        --     copilot.accept()
-           if false then 
-                print("Copilot off")
-                        elseif cmp.visible() then
-                            local entry = cmp.get_selected_entry()
-                            if not entry then
-                                cmp.select_next_item { behavior = cmp.SelectBehavior.Select }
-                            else
-                                cmp.confirm()
-                            end
-                        elseif luasnip.expand_or_jumpable() then
-                            luasnip.expand_or_jump()
-                        else
-                            fallback()
-                        end
-                    end, { 'i', 's' }),
+        -- ['<Tab>'] = cmp.mapping(function(fallback)
+        --                 -- if copilot.is_visible() then
+        --                 --     copilot.accept()
+        --    if false then 
+        --         print("Copilot off")
+        --                 elseif cmp.visible() then
+        --                     local entry = cmp.get_selected_entry()
+        --                     if not entry then
+        --                         cmp.select_next_item { behavior = cmp.SelectBehavior.Select }
+        --                     else
+        --                         cmp.confirm()
+        --                     end
+        --                 elseif luasnip.expand_or_jumpable() then
+        --                     luasnip.expand_or_jump()
+        --                 else
+        --                     fallback()
+        --                 end
+        --             end, { 'i', 's' }),
         ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
                 cmp.select_prev_item()
@@ -48,12 +48,15 @@ cmp.setup({
       -- end),
     },
     sources = {
-        per_filetype = {
-          codecompanion = { "codecompanion" },
-        },
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-        { name = "buffer" },
+        -- per_filetype = {
+        --   codecompanion = { "codecompanion" },
+        -- },
+  -- Copilot Source
+    { name = "copilot", group_index = 2 },
+    -- Other Sources
+    { name = "nvim_lsp", group_index = 2 },
+    { name = "path", group_index = 2 },
+    { name = "luasnip", group_index = 2 },
     },
     experimental = {
         ghost_text = false, -- Habilita el ghost text

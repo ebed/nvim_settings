@@ -37,11 +37,6 @@ return {
       elixir_mix:toggle()
     end
 
-    vim.api.nvim_set_keymap("n", "<leader>mb", "<cmd>lua _MAVEN_BUILD_TOGGLE()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>mr", "<cmd>lua _MAVEN_RUN_TOGGLE()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>gb", "<cmd>lua _GRADLE_BUILD_TOGGLE()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>gr", "<cmd>lua _GRADLE_RUN_TOGGLE()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>et", "<cmd>lua _ELIXIR_MIX_TOGGLE()<CR>", { noremap = true, silent = true })
   end,
 }
 

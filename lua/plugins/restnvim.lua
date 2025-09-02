@@ -47,16 +47,5 @@ return {
     })
 
     -- Configurar keymaps que usan los modificadores de comandos
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "http",
-      callback = function()
-        -- Ejecutar petición y abrir resultados en split vertical (derecha)
-        vim.keymap.set("n", "<leader>re", ":vert Rest run<CR>", { buffer = true, desc = "Execute request" })
-        -- Previsualizar petición
-        vim.keymap.set("n", "<leader>rp", ":Rest curl yank<CR>", { buffer = true, desc = "Preview request" })
-        -- Re-ejecutar última petición en split vertical (derecha)
-        vim.keymap.set("n", "<leader>rl", ":vert Rest last<CR>", { buffer = true, desc = "Re-run last request" })
-      end,
-    })
   end,
 }

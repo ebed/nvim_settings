@@ -40,6 +40,37 @@ function M.create_dot_from_selection()
   end)
 end
 
+
+function M.get_multiline_input(prompt)
+  -- Create a new scratch buffer
+  local buf = vim.api.nvim_create_buf(false, true)
+  -- Set buffer lines with prompt
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { prompt, "", "-- Write your requirement below. Close buffer when done. --" })
+  -- Open floating window
+  local width = math.floor(vim.o.columns * 0.6)
+  local height = 8
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = math.floor((vim.o.lines - height) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+    style = "minimal",
+    border = "rounded",
+  })
+  -- Wait for user to close the window
+  vim.cmd("startinsert")
+  vim.api.nvim_buf_set_keymap(buf, "n", "q", ":bd!<CR>", { noremap = true, silent = true })
+  -- Block until buffer is closed
+  vim.wait(100000, function()
+    return not vim.api.nvim_win_is_valid(win)
+  end)
+  -- Get lines (excluding prompt and instructions)
+  local lines = vim.api.nvim_buf_get_lines(buf, 1, -1, false)
+  return table.concat(lines, "\n")
+end
+
+
 function M.get_context_dir()
   return vim.fn.expand("~/.copilotchat-contexts/")
 end
