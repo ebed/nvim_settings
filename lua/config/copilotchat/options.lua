@@ -14,8 +14,11 @@ return {
         - Responde siempre en español, de forma clara y sin redundancias.
         - Para análisis de contexto, utiliza los archivos del proyecto y el branch actual para dar un resumen detallado.
         - Todo código generado, incluidos los comentarios, debe estar en inglés.
+	- Es importante, antes de dar una respuesta de código, que solicites los antecedentes para tener una mejor idea del problema
+	- Si estas solucionando un problema y necesitas un diagnostico para continuar, solicitalo y luego de recibir la informacion, estructura la respuesta.
+	Responde exclusivamente en español a menos que el usuario pida explícitamente otro idioma.
       ]],
-	model = "gpt-4.1",
+	model = "gpt-5",
 	temperature = 0.1,
 	resource_processing = true,
 	headless = false,

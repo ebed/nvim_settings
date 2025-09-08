@@ -53,7 +53,7 @@ capabilities.textDocument.codeAction = {
 
 -- Función común para configurar keymaps al adjuntar un cliente LSP
 local function on_attach(_, bufnr)
-	client.server_capabilities.documentFormattingProvider = false
+	client.server_capabilities.documentFormattingProvider = true
 end
 lspconfig.jdtls.setup({
 	root_dir = function(fname)
@@ -88,14 +88,21 @@ local server_configs = {
 					path = vim.split(package.path, ";"),
 				},
 				diagnostics = {
-					globals = { "vim" }, -- Evita falsos positivos en configuraciones de Neovim
+					globals = { "vim" },
 				},
 				workspace = {
 					library = vim.api.nvim_get_runtime_file("", true),
 					checkThirdParty = false,
 				},
 				telemetry = {
-					enable = false, -- Desactiva telemetría
+					enable = false,
+				},
+				format = {
+					enable = true,
+					defaultConfig = {
+						indent_style = "space",
+						indent_size = "2",
+					},
 				},
 			},
 		},

@@ -1,0 +1,25 @@
+
+hola, necesito tu ayuda como experto en development, acompañandome durante el aprendizaje ya que estoy aprendiendo aun el uso de LUA, por lo que necesito que apliques las mejores practicas, patrones de diseño, pensando en la escalabilidad, performance, modularidad, reusabilidad, integracion.
+Quiero hacer un plugin para neovim version minima 0.10. 
+Este plugin tendra la mision de ser un manager de git para facilitar el flujo de trabajo, donde  se pueda:
+
+- tener una gestion de los cambios en archivos, de manera clara, para poder crear commits, agregar descripcion, editar descripcion, añadir archivos al commit, ver metadata de los commits, hacer stash de los cambios, anticiparse si un cambio de un archivo aun no añadido puede causar conflictos, todo esto de manera ordenada, aplicando buenas practicas de usabilidad y visualizacion,
+a primera instancia siento que Telescope puede ser una opcion pero queda algo corta para poder tener todo en un lugar.
+
+Creo que un buffer dedicado con splits puede ser mas práctico. Necesito que en todo momento haya un split con la ayuca, mostrando los keymaps hints ayuda de cada posible accion dependiendo de donde este posicionado
+Ademas otro split que tenga un preview de informacion de donde estoy posicionado. 
+
+Usar de ser posible colores e iconos, y tablas para ver mas organizada la informacion. 
+
+Armemos una lista de tareas organizada para esta primera etapa, quizas trabajada en fases.
+Ir definiendo en la lista de tareas y fases, puntos en que se generara un commit y un pull request para ir almacenando los avances por ramas 
+
+Fases posteriores seran la gestion de branches, resolucion de conflictos, merge y rebase, cherry pick (no estoy seguro si agregarlo en la primera fase, se aceptan propuestas).
+
+Todo lo que hagamos tiene que estar modularizado para poder permitir agregar nuevos elementos reutilizando elementos de manera simple para agregar funcionalidades, por ejemplo algo que mantenga la generacion del contenido de las visualizacines, otra que la formatee, otra que interaccine con git, otra que mantenga la logica, otra la orquestacion, etc... acepto propuestas.
+
+Una vez que tengamos definido esto, pensando en tener una primera etapa como un quick win, armemos un DEV_STATUS.md con toda la informacion definida para poder ir almacenando las definiciones y ajustarlas de ser necesario. Otro archivo Architecture.md con todas las definiciones de arquitectura, otro de design.md con todo lo de diseño, etc... 
+Todo debe estar preparado para poder implementar multi lenguaje, y tener posibilidad de aplicar niveles de LOG, para hacer debug facilmente.
+Ademas generar un README.md con el detalle del proyecto.
+
+
