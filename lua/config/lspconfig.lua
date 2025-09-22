@@ -131,8 +131,8 @@ local server_configs = {
 	},
 }
 
--- vim.lsp.log.set_level(vim.log.levels.OFF)
-vim.lsp.log.set_level(vim.log.levels.DEBUG)
+vim.lsp.log.set_level(vim.log.levels.OFF)
+-- vim.lsp.log.set_level(vim.log.levels.DEBUG)
 -- Configuración genérica para todos los servidores
 for _, server in ipairs(servers) do
 	local opts = {

@@ -7,7 +7,6 @@ require("config.gitsigns")
 require("config.lspconfig")
 require("config.telescope")
 require("config.mappings")
-require("config.copilotchat")
 -- require('config.kafka.kafka')
 
 vim.cmd "autocmd User TelescopePreviewerLoaded setlocal number"
