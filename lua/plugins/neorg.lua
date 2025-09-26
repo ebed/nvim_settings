@@ -7,6 +7,8 @@
           load = {
             ["core.defaults"] = {},
             ["core.concealer"] = {},
+         ["core.esupports.hop"] ={}, 
+            ["core.summary"] = {},
             ["core.dirman"] = {
               config = {
                 workspaces = {

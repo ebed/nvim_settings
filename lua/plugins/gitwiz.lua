@@ -1,6 +1,5 @@
 return {
 	"creaccion/GitWiz",
-	dir = "~/workspaces/personal/nvim/GitWizV2",
 	config = function()
 		require("gitwiz").setup({
 			log = { level = "DEBUG", file = "/tmp/gitwiz.log" },

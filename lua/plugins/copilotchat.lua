@@ -1,7 +1,7 @@
 return {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
-      { dir = "/Users/ralbertomerinocolipe/workspaces/personal/nvim/CopilotChatAssist" },
+      { "creaccion/CopilotChatAssist" },
       { "nvim-lua/plenary.nvim" },
     },
   build = "make tiktoken",
