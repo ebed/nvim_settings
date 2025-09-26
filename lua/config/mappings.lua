@@ -4,6 +4,7 @@
 
 local opts = { noremap = true, silent = true }
 
+vim.api.nvim_set_keymap('n', '<CR>', [[:lua require('utils.neorg_utils').open_or_create_linked_file()<CR>]], { noremap = true, silent = true })
 -- === General ===
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
 vim.keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit window" })

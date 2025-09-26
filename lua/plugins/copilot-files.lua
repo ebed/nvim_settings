@@ -1,6 +1,8 @@
 return {
-	"creaccion/copilot-files",
-	dir = "~/workspaces/personal/nvim/copilotfiles",
+       "creaccion/CopilotChatAssist" ,
+	dependencies = {
+	"creaccion/CopilotFiles"
+    },
 	config = function()
 		require("copilotfiles").setup()
 	end,
