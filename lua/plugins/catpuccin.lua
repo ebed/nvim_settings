@@ -17,7 +17,7 @@ return {
 			dim_inactive = {
 				enabled = true, -- dims the background color of inactive window
 				shade = "dark",
-				percentage = 0.15, -- percentage of the shade to apply to the inactive window
+				percentage = 0.45, -- percentage of the shade to apply to the inactive window
 			},
 			no_italic = false, -- Force no italic
 			no_bold = false, -- Force no bold
@@ -37,45 +37,51 @@ return {
 				operators = {},
 				-- miscs = {}, -- Uncomment to turn off hard-coded styles
 			},
-			color_overrides = {
-				latte = {
-					base = "#FAF8F6", -- Un gris claro en vez de blanco puro
-				},
-			},
+			-- color_overrides = {
+			-- 	latte = {
+			-- 		base = "#FAF8F6", -- Un gris claro en vez de blanco puro
+			-- 	},
+			-- },
 			custom_highlights = {},
-			highlight_overrides = {
-				mocha = function(C)
-					return {
-						LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
-						Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
-						CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
-						CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
-					}
-				end,
-				frappe = function(C)
-					return {
-						LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
-						Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
-						CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
-						CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
-					}
-				end,
-				macchiato = function(C)
-					return {
-						LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
-						Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
-						CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
-						CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
-					}
-				end,
-			},
+			-- highlight_overrides = {
+			-- 	mocha = function(C)
+			-- 		return {
+			-- 			LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
+			-- 			Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
+			-- 			CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
+			-- 			CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
+			-- 		}
+			-- 	end,
+			-- 	frappe = function(C)
+			-- 		return {
+			-- 			LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
+			-- 			Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
+			-- 			CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
+			-- 			CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
+			-- 		}
+			-- 	end,
+			-- 	macchiato = function(C)
+			-- 		return {
+			-- 			LineNr = { fg = C.overlay2, style = {} }, -- color para números de línea
+			-- 			Cursor = { fg = C.base, bg = C.yellow, style = { "bold" } },
+			-- 			CursorLineNr = { fg = C.peach, style = { "bold" } }, -- número de línea actual en bold y otro color
+			-- 			CursorLine = { bg = C.surface1 }, -- Fondo más visible para la línea actualyy
+			-- 		}
+			-- 	end,
+			-- },
 			default_integrations = true,
 			integrations = {
+				aerial = true,
 				cmp = true,
 				gitsigns = true,
 				nvimtree = true,
+				headlines = true,
 				treesitter = true,
 				notify = true,
+				dropbar = {
+					enabled = true,
+					color_mode = true, -- enable color for kind's texts, not just kind's icons
+				},
 				mini = {
 					enabled = true,
 					indentscope_color = "",
@@ -83,9 +89,13 @@ return {
 				telescope = {
 					enabled = true,
 				},
+				indent_blankline = {
+					enabled = true,
+					scope_color = "", -- catppuccin color (eg. `lavender`) Default: text
+					colored_indent_levels = false,
+				},
 				-- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
 			},
 		})
-
 	end,
 }
