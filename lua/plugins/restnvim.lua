@@ -31,7 +31,7 @@ return {
         show_url = true,
         show_curl_command = false,
         show_http_info = true,
-        show_headers = false,
+        show_headers = true,
         formatters = {
           json = "jq",
           html = function(body)
