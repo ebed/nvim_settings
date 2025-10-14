@@ -1,0 +1,193 @@
+-- Configuración extremadamente minimalista para JDTLS
+local home = os.getenv("HOME")
+local java_home = os.getenv("JAVA_HOME")
+
+if not java_home or java_home == "" then
+    vim.notify("JAVA_HOME environment variable not set. JDTLS will not start properly.", vim.log.levels.ERROR)
+    return {}
+end
+
+local java_binary = java_home .. "/bin/java"
+
+-- Verify Java binary exists
+if vim.fn.executable(java_binary) ~= 1 then
+    vim.notify("Java binary not found at: " .. java_binary, vim.log.levels.ERROR)
+    return {}
+end
+
+-- Basic paths
+local jdtls_path = home .. "/workspaces/utils/jdtls"
+local lombok_jar = home .. "/workspaces/utils/lombok.jar"
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+
+-- Find launcher jar
+local launcher_glob = jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"
+local launcher_jar = vim.fn.glob(launcher_glob, true)
+local config_dir = jdtls_path .. "/config_mac"
+
+-- Configuración Java con mejor soporte para Lombok
+local java_cmd = {
+    java_binary,
+    -- Configuración Lombok - colocada al inicio para mejor funcionamiento
+    "-javaagent:" .. lombok_jar,
+    "-Xbootclasspath/a:" .. lombok_jar, -- Crucial para procesamiento completo de anotaciones
+    -- Habilitar explícitamente el procesamiento de anotaciones
+    "-Dorg.eclipse.jdt.core.compiler.processAnnotations=enabled",
+    -- Configuración estándar de JDTLS
+    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    "-Dosgi.bundles.defaultStartLevel=4",
+    "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    "-Dlog.level=INFO",
+    -- Memoria
+    "-Xms1G",
+    "-Xmx2G",
+    -- Módulos
+    "--add-modules=ALL-SYSTEM,java.compiler", -- java.compiler es necesario para Lombok
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.util=ALL-UNNAMED",
+    "--add-opens=java.compiler/javax.annotation.processing=ALL-UNNAMED", -- Para procesamiento de anotaciones
+    -- Archivos jar, configuración y datos
+    "-jar", launcher_jar,
+    "-configuration", config_dir,
+    "-data", workspace_dir
+}
+
+return {
+    'mfussenegger/nvim-jdtls',
+    config = function()
+        vim.api.nvim_create_autocmd({"FileType"}, {
+            pattern = {"java"},
+            callback = function()
+                -- Skip if not a Java file
+                local filename = vim.api.nvim_buf_get_name(0)
+                if not filename:match("%.java$") then
+                    return
+                end
+
+                -- Basic startup
+                local status, jdtls = pcall(require, 'jdtls')
+                if not status then
+                    vim.notify("Failed to load jdtls", vim.log.levels.ERROR)
+                    return
+                end
+
+                -- Configuración mejorada con soporte completo para Lombok
+                local config = {
+                    cmd = java_cmd,
+                    root_dir = require('jdtls.setup').find_root({'pom.xml', 'build.gradle', 'settings.gradle', '.git', 'mvnw', 'gradlew'}),
+                    settings = {
+                        java = {
+                            configuration = {
+                                updateBuildConfiguration = "automatic",
+                                runtimes = {{
+                                    name = "JavaSE-21",
+                                    path = java_home,
+                                    default = true
+                                }},
+                            },
+                            -- Configuración explícita para Lombok
+                            compiler = {
+                                lombokEnabled = true,
+                                annotationProcessingEnabled = true
+                            },
+                            -- Importaciones
+                            sources = {
+                                organizeImports = {
+                                    starThreshold = 9999,
+                                    staticStarThreshold = 9999
+                                }
+                            },
+                            -- Gradle para proyectos multi-módulo
+                            import = {
+                                gradle = {
+                                    enabled = true,
+                                    wrapper = {
+                                        enabled = true
+                                    }
+                                }
+                            },
+                            -- Habilitar construcción automática
+                            autobuild = { enabled = true }
+                        }
+                    },
+                    -- Inicialización para capacidades extendidas
+                    init_options = {
+                        extendedClientCapabilities = require('jdtls').extendedClientCapabilities
+                    }
+                }
+
+                -- Start server
+                jdtls.start_or_attach(config)
+            end
+        })
+
+        -- Simple command for status
+        vim.api.nvim_create_user_command("JdtInfo", function()
+            -- Check if JDTLS is active
+            local clients = vim.lsp.get_clients({name = "jdtls"})
+            if #clients > 0 then
+                vim.notify("✅ JDTLS active", vim.log.levels.INFO)
+            else
+                vim.notify("❌ JDTLS not active", vim.log.levels.ERROR)
+            end
+
+            -- Check Java and paths
+            vim.notify("Java binary: " .. java_binary, vim.log.levels.INFO)
+            vim.notify("Workspace: " .. workspace_dir, vim.log.levels.INFO)
+        end, {})
+
+        -- Comando para diagnosticar problemas con Lombok
+        vim.api.nvim_create_user_command("LombokStatus", function()
+            -- Verificar archivo Lombok
+            local lombok_exists = vim.fn.filereadable(lombok_jar) == 1
+            if lombok_exists then
+                vim.notify("✅ Archivo Lombok encontrado: " .. lombok_jar, vim.log.levels.INFO)
+            else
+                vim.notify("❌ Archivo Lombok NO encontrado: " .. lombok_jar, vim.log.levels.ERROR)
+                return
+            end
+
+            -- Verificar configuración de Java
+            local java_cmd_str = table.concat(java_cmd, " ")
+            local has_javaagent = java_cmd_str:match("-javaagent.*lombok")
+            local has_bootclasspath = java_cmd_str:match("-Xbootclasspath.*lombok")
+            local has_annotation_processing = java_cmd_str:match("processAnnotations=enabled")
+
+            vim.notify("Estado de configuración de Lombok:", vim.log.levels.INFO)
+            vim.notify("-javaagent: " .. (has_javaagent and "✅" or "❌"), vim.log.levels.INFO)
+            vim.notify("-Xbootclasspath: " .. (has_bootclasspath and "✅" or "❌"), vim.log.levels.INFO)
+            vim.notify("processAnnotations: " .. (has_annotation_processing and "✅" or "❌"), vim.log.levels.INFO)
+
+            -- Verificar configuración del cliente JDTLS
+            local clients = vim.lsp.get_clients({name = "jdtls"})
+            if #clients > 0 then
+                vim.notify("JDTLS está activo. Verificando configuración...", vim.log.levels.INFO)
+
+                -- Mostrar información de prueba
+                vim.notify("Si Lombok sigue sin funcionar después de estos cambios:", vim.log.levels.INFO)
+                vim.notify("1. Ejecuta :JdtClean", vim.log.levels.INFO)
+                vim.notify("2. Reinicia completamente Neovim", vim.log.levels.INFO)
+                vim.notify("3. Verifica que tu proyecto tenga Lombok como dependencia en build.gradle o pom.xml", vim.log.levels.INFO)
+            else
+                vim.notify("❌ JDTLS no está activo. Abre un archivo Java primero.", vim.log.levels.ERROR)
+            end
+        end, {})
+
+        -- Clean workspace command
+        vim.api.nvim_create_user_command("JdtClean", function()
+            pcall(function() vim.cmd("LspStop jdtls") end)
+            vim.notify("Stopped JDTLS", vim.log.levels.INFO)
+
+            -- Delete workspace
+            local ws_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+            if vim.fn.isdirectory(ws_dir) == 1 then
+                local cmd = "rm -rf " .. vim.fn.shellescape(ws_dir)
+                os.execute(cmd)
+                vim.notify("Workspace deleted", vim.log.levels.INFO)
+            end
+
+            vim.notify("Please restart Neovim for changes to take effect", vim.log.levels.INFO)
+        end, {})
+    end
+}

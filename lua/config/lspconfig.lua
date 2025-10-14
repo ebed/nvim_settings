@@ -1,28 +1,15 @@
 pcall(require, "java") -- Esto asegura que el módulo esté cargado
 
-local home = os.getenv("HOME")
-local jdk21 = home .. "/.asdf/installs/java/zulu-21.42.19"
-local lspconfig = require("lspconfig")
 local mason_lspconfig = require("mason-lspconfig")
-local lombok_jar = home .. "/workspaces/utils/lombok-edge.jar"
-local config_dir = "/Users/ralbertomerinocolipe/.cache/jdtls/config"
--- local workspace_dir = "/Users/ralbertomerinocolipe/.cache/jdtls/workspace"
-local mason_path = vim.fn.stdpath("data") .. "/mason"
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-local workspace_dir = vim.fn.stdpath("data") .. "/jdtls-workspace/" .. project_name
-local bundles = {
-	mason_path .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin.jar",
-	mason_path .. "/share/java-test/*.jar",
-}
--- local lombok_jar = home .. "/workspaces/utils/lombok-edge.jar"
--- require('java').setup()
+
 -- Lista de servidores a instalar y configurar
 local servers = {
 	"solargraph", -- Ruby
-	"elixirls", -- Elixir
+	-- "elixirls", -- Elixir
 	-- "nextls",
+	"emmylua_ls",
+	"expert",
 	"pyright", -- Python
-	-- "jdtls",          -- Java
 	"terraformls", -- Terraform
 	"yamlls", -- YAML
 }
@@ -32,6 +19,13 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 capabilities.textDocument.completion.completionItem.resolveSupport = {
 	properties = { "documentation", "detail", "additionalTextEdits" },
+}
+
+-- Add explicit workspace folder support
+capabilities.workspace = capabilities.workspace or {}
+capabilities.workspace.workspaceFolders = {
+	supported = true,
+	changeNotifications = true
 }
 capabilities.textDocument.codeAction = {
 	dynamicRegistration = false,
@@ -51,17 +45,6 @@ capabilities.textDocument.codeAction = {
 	},
 }
 
--- Función común para configurar keymaps al adjuntar un cliente LSP
-local function on_attach(_, bufnr)
-	client.server_capabilities.documentFormattingProvider = true
-end
-lspconfig.jdtls.setup({
-	root_dir = function(fname)
-		local root = require("lspconfig.util").root_pattern(".git")(fname)
-		print("[JDTLS] Detected root_dir: " .. (root or "nil"))
-		return root
-	end,
-})
 --
 -- Configuración de Mason para instalar servidores automáticamente
 mason_lspconfig.setup({
@@ -80,6 +63,20 @@ local server_configs = {
 			},
 		},
 	},
+	emmylua_ls = {
+		settings = {
+			Lua = {
+				library = {
+					vim.env.VIMRUNTIME,
+					vim.fn.expand("~/.local/share/nvim/lazy/"),
+				},
+				diagnostics = {
+					globals = { "vim" },
+				},
+			},
+		},
+	},
+	-- jdtls = {},
 	lua_ls = {
 		settings = {
 			Lua = {
@@ -91,7 +88,11 @@ local server_configs = {
 					globals = { "vim" },
 				},
 				workspace = {
-					library = vim.api.nvim_get_runtime_file("", true),
+					-- library = vim.api.nvim_get_runtime_file("", true),
+					library = {
+						vim.env.VIMRUNTIME,
+						vim.fn.expand("~/.local/share/nvim/lazy/"),
+					},
 					checkThirdParty = false,
 				},
 				telemetry = {
@@ -118,32 +119,54 @@ local server_configs = {
 			},
 		},
 	},
-	elixirls = {
-		cmd = { "/opt/homebrew/bin/elixir-ls" },
-		settings = {
-			elixirLS = {
-				dialyzerEnabled = true,
-				fetchDeps = false,
-				enableTestLenses = true,
-				suggestSpecs = true,
-			},
+	expert = {
+		env = {
+			MIX_ENV = "test"
 		},
+		-- Asegúrate de que detecte la raíz del proyecto correctamente
+		-- root_dir = lspconfig.util.root_pattern("mix.exs", ".git"),
 	},
+	-- elixirls = {
+	-- 	cmd = { "/opt/homebrew/bin/elixir-ls" },
+	-- 	settings = {
+	-- 		elixirLS = {
+	-- 			dialyzerEnabled = true,
+	-- 			fetchDeps = false,
+	-- 			enableTestLenses = true,
+	-- 			suggestSpecs = true,
+	-- 			projectionist = true,
+	--
+	-- 		},
+	-- 	},
+	-- },
 }
 
-vim.lsp.log.set_level(vim.log.levels.OFF)
--- vim.lsp.log.set_level(vim.log.levels.DEBUG)
--- Configuración genérica para todos los servidores
-for _, server in ipairs(servers) do
-	local opts = {
-		on_attach = on_attach,
-		flags = { debounce_text_changes = 150 },
-		capabilities = capabilities,
-	}
-	-- Aplica configuraciones específicas si existen
-	if server_configs[server] then
-		opts = vim.tbl_deep_extend("force", opts, server_configs[server])
+-- Función común para configurar keymaps al adjuntar un cliente LSP
+local function on_attach(client, bufnr)
+	-- Verify buffer exists and is loaded
+	if not vim.api.nvim_buf_is_valid(bufnr) then
+		vim.notify("LSP tried to attach to invalid buffer: " .. bufnr, vim.log.levels.WARN)
+		return
 	end
 
-	lspconfig[server].setup(opts)
+	client.server_capabilities.documentFormattingProvider = true
+	vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+end
+-- Configure LSP logging level
+-- Use one of the following:
+-- vim.lsp.log.set_level(vim.log.levels.OFF)   -- Turn off logging
+-- vim.lsp.log.set_level(vim.log.levels.ERROR) -- Only errors
+-- vim.lsp.log.set_level(vim.log.levels.WARN)  -- Warnings and errors
+-- vim.lsp.log.set_level(vim.log.levels.INFO)  -- Info, warnings, and errors
+-- vim.lsp.log.set_level(vim.log.levels.DEBUG) -- Debug and all above
+
+-- Use ERROR level for everyday use
+vim.lsp.log.set_level(vim.log.levels.ERROR)
+-- Configuración genérica para todos los servidores
+for server, config in pairs(server_configs) do
+	vim.lsp.config(server, vim.tbl_deep_extend('force', {
+		capabilities = capabilities,
+		on_attach = on_attach,
+	}, config))
+	vim.lsp.enable(server)
 end

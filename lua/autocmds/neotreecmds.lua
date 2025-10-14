@@ -1,0 +1,27 @@
+-- -- Autocmd to refresh Neo-tree highlight when changing buffers
+-- vim.api.nvim_create_autocmd("BufEnter", {
+--   callback = function()
+--     local bufname = vim.api.nvim_buf_get_name(0)
+--     if bufname == "" or vim.bo.filetype == "neo-tree" or vim.fn.filereadable(bufname) ~= 1 then
+--       return
+--     end
+--
+--     -- Find a neo-tree window
+--     for _, win in ipairs(vim.api.nvim_list_wins()) do
+--       local b = vim.api.nvim_win_get_buf(win)
+--       if vim.bo[b].filetype == "neo-tree" then
+--         local ok, manager = pcall(require, "neo-tree.sources.manager")
+--         if not ok then return end
+--         local state = manager.get_state("filesystem")
+--         if not state or not state.tree then break end
+--         local selected = state.tree:get_node()
+--         if selected and selected.path == bufname then
+--           -- Already pointing to this file; do nothing
+--           return
+--         end
+--         vim.cmd("Neotree reveal")
+--         return
+--       end
+--     end
+--   end,
+-- })

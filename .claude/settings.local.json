@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/ralbertomerinocolipe/.local/state/nvim/**)",
+      "Read(//Users/ralbertomerinocolipe/workspaces/utils/jdt-language-server-1.52.0-202510230337/**)",
+      "Read(//Users/ralbertomerinocolipe/workspaces/utils/**)",
+      "Bash(echo $JAVA_HOME)",
+      "Bash(java:*)",
+      "Read(//Users/ralbertomerinocolipe/.local/share/nvim/jdtls-workspace/**)",
+      "Bash(echo:*)",
+      "Read(//Users/ralbertomerinocolipe/workspaces/Pagerduty/shift-management-service/**)",
+      "Bash(cat:*)",
+      "Bash($JAVA_HOME/bin/java:*)",
+      "Bash(printenv)",
+      "Bash(chmod:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

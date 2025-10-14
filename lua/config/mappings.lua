@@ -13,6 +13,9 @@ vim.keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit window" })
 vim.keymap.set("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Quit all (force)" })
 vim.keymap.set("n", "<leader>h", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 
+vim.keymap.set("n", "<tab>", "<cmd>bnext<CR>", { desc = "Tab next" })
+vim.keymap.set("n", "<s-tab>", "<cmd>bprev<CR>", { desc = "Tab prev" })
+
 -- === Buffer Navigation ===
 vim.keymap.set("n", "<leader>bn", "<cmd>bn<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<leader>bp", "<cmd>bp<CR>", { desc = "Previous buffer" })
@@ -88,26 +91,30 @@ vim.keymap.set("n", "<leader>gb", "<cmd>lua _GRADLE_BUILD_TOGGLE()<CR>", { desc 
 vim.keymap.set("n", "<leader>gr", "<cmd>lua _GRADLE_RUN_TOGGLE()<CR>", { desc = "Gradle Run" })
 vim.keymap.set("n", "<leader>et", "<cmd>lua _ELIXIR_MIX_TOGGLE()<CR>", { desc = "Elixir Mix" })
 
--- === Catppuccin Theme Switching ===
-vim.keymap.set("n", "<leader>cl", function()
-  require("catppuccin").setup({ flavour = "latte" })
-  vim.cmd.colorscheme "catppuccin"
-end, { desc = "Catppuccin Latte" })
+vim.keymap.set('n', '!', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
 
-vim.keymap.set("n", "<leader>cf", function()
-  require("catppuccin").setup({ flavour = "frappe" })
-  vim.cmd.colorscheme "catppuccin"
-end, { desc = "Catppuccin Frappe" })
 
-vim.keymap.set("n", "<leader>cm", function()
-  require("catppuccin").setup({ flavour = "macchiato" })
-  vim.cmd.colorscheme "catppuccin"
-end, { desc = "Catppuccin Macchiato" })
 
-vim.keymap.set("n", "<leader>co", function()
-  require("catppuccin").setup({ flavour = "mocha" })
-  vim.cmd.colorscheme "catppuccin"
-end, { desc = "Catppuccin Mocha" })
+-- -- === Catppuccin Theme Switching ===
+-- vim.keymap.set("n", "<leader>cl", function()
+--   require("catppuccin").setup({ flavour = "latte" })
+--   vim.cmd.colorscheme "catppuccin"
+-- end, { desc = "Catppuccin Latte" })
+--
+-- vim.keymap.set("n", "<leader>cf", function()
+--   require("catppuccin").setup({ flavour = "frappe" })
+--   vim.cmd.colorscheme "catppuccin"
+-- end, { desc = "Catppuccin Frappe" })
+--
+-- vim.keymap.set("n", "<leader>cm", function()
+--   require("catppuccin").setup({ flavour = "macchiato" })
+--   vim.cmd.colorscheme "catppuccin"
+-- end, { desc = "Catppuccin Macchiato" })
+--
+-- vim.keymap.set("n", "<leader>co", function()
+--   require("catppuccin").setup({ flavour = "mocha" })
+--   vim.cmd.colorscheme "catppuccin"
+-- end, { desc = "Catppuccin Mocha" })
 
 -- === Markdown Preview ===
 vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
@@ -115,6 +122,50 @@ vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "To
 -- === Miscellaneous ===
 vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
 vim.keymap.set("n", "<leader>z", "<cmd>ZenMode<CR>", { desc = "Toggle Zen Mode" })
+
+
+
+
+vim.keymap.set({'x', 'o'}, 'R',  function ()
+  require('leap.treesitter').select {
+    -- To increase/decrease the selection in a clever-f-like manner,
+    -- with the trigger key itself (vRRRRrr...). The default keys
+    -- (<enter>/<backspace>) also work, so feel free to skip this.
+    opts = require('leap.user').with_traversal_keys('R', 'r')
+  }
+end)
+
+-- === JDTLS Java LSP Actions ===
+vim.keymap.set("n", "<A-o>", "<Cmd>lua require'jdtls'.organize_imports()<CR>", { desc = "JDTLS: Organize Imports" })
+vim.keymap.set("n", "crv", "<Cmd>lua require('jdtls').extract_variable()<CR>", { desc = "JDTLS: Extract Variable" })
+vim.keymap.set("v", "crv", "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", { desc = "JDTLS: Extract Variable (visual)" })
+vim.keymap.set("n", "crc", "<Cmd>lua require('jdtls').extract_constant()<CR>", { desc = "JDTLS: Extract Constant" })
+vim.keymap.set("v", "crc", "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", { desc = "JDTLS: Extract Constant (visual)" })
+vim.keymap.set("v", "crm", "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", { desc = "JDTLS: Extract Method (visual)" })
+-- === JDTLS DAP (Debug Adapter Protocol) ===
+vim.keymap.set("n", "<leader>df", "<Cmd>lua require'jdtls'.test_class()<CR>", { desc = "JDTLS: Test Class" })
+vim.keymap.set("n", "<leader>dn", "<Cmd>lua require'jdtls'.test_nearest_method()<CR>", { desc = "JDTLS: Test Nearest Method" })
+-- vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
+-- vim.keymap.set('n',             'S', '<Plug>(leap-from-window)')
+
+
+
+-- === ELIXIR TOOLS and TEST ===
+-- 
+vim.keymap.set('n', '<leader>Te', '<cmd>lua require("neotest").run.run()<CR>', { desc = "Run Tests on file" })
+vim.keymap.set('n', '<leader>Ta', '<cmd>lua require("neotest").run.run({suite = true})<CR>', { desc = "Run Test Suite" })
+vim.keymap.set('n', '<leader>Tc', '<cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>', { desc = "Run Test Current File" })
+vim.keymap.set('n', '<leader>Ts', '<cmd>Neotest summary<CR>', { desc = "Test Summary" })
+
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "http",
+  callback = function()
+    vim.keymap.set("n", "<leader>r", "<cmd>Rest run<cr>", { buffer = true, desc = "Run HTTP request" })
+  end,
+})
+ 
+
 
 -- Add more mappings as needed, following the documented group structure above.
 

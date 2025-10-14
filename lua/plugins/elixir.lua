@@ -1,3 +1,3 @@
 return {
-	'mhanberg/elixir.nvim'
+-- 	'mhanberg/elixir.nvim'
 }

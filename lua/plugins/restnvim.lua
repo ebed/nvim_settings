@@ -14,12 +14,10 @@ return {
     require("rest-nvim").setup({
       -- Nivel de log como texto
       log_level = "info",
-      
       -- Configuración de ventanas - esto es menos importante ahora
       -- porque usaremos los modificadores de comandos
       result_split_horizontal = false,
       result_split_in_place = false,
-      
       -- Resto de la configuración
       skip_ssl_verification = false,
       encode_url = true,
@@ -43,7 +41,6 @@ return {
       env_file = ".env",
       custom_dynamic_variables = {},
       yank_dry_run = true,
-      result_split_in_place = false,
     })
 
     -- Configurar keymaps que usan los modificadores de comandos

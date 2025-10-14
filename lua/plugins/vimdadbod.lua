@@ -26,6 +26,10 @@ return {
       },
      {
         name = 'local sms',
+        url = 'mysql://root:root@127.0.1:3308/shift_management_service'
+      },
+     {
+        name = 'local sms standalone',
         url = 'mysql://root:root@127.0.1:3306/shift_management_service'
       }
       -- { 

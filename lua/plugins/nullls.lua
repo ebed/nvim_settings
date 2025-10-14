@@ -10,8 +10,8 @@ return {
         null_ls.builtins.formatting.rubocop,
 
         -- Elixir
-        null_ls.builtins.diagnostics.credo,
-        null_ls.builtins.formatting.mix,
+        -- null_ls.builtins.diagnostics.credo,
+        -- null_ls.builtins.formatting.mix,
 
         -- Java
         null_ls.builtins.formatting.google_java_format,

@@ -1,0 +1,468 @@
+local home = os.getenv("HOME")
+
+-- JDK detection: prefer specific Java 21 JDK via /usr/libexec/java_home on macOS.
+-- local java_home = vim.fn.trim(vim.fn.system("/usr/libexec/java_home -v 21 2>/dev/null"))
+-- if java_home == "" then
+-- 	java_home = os.getenv("JAVA_HOME") or ""
+-- end
+-- Fallback to PATH 'java' if neither detection succeeded.
+-- local java_binary = (java_home ~= "" and (java_home .. "/bin/java")) or "java"
+--
+-- Keep original JDK path (unused) prefixed to silence diagnostics.
+-- local _jdk21 = home .. "/.asdf/installs/java/zulu-21.42.19"
+
+-- Force fallback to JDK 21 if detected java_home does not point to 21 and fallback exists.
+-- if java_home ~= "" and not java_home:match("21") and vim.loop.fs_stat(_jdk21) then
+-- vim.notify("Forcing JDK 21 fallback: " .. _jdk21, vim.log.levels.INFO)
+local java_home = os.getenv("JAVA_HOME")
+if not java_home or java_home == "" then
+	vim.notify("JAVA_HOME environment variable not set. JDTLS will not start properly.", vim.log.levels.ERROR)
+	return {}
+end
+
+local java_binary = java_home .. "/bin/java"
+
+-- Verify Java binary exists
+if vim.fn.executable(java_binary) ~= 1 then
+	vim.notify("Java binary not found at: " .. java_binary, vim.log.levels.ERROR)
+	return {}
+end
+-- Reassign java_binary to use the fallback JDK.
+-- java_binary = java_home .. "/bin/java"
+-- end
+
+-- Lombok jar (ensure the file exists)
+local lombok_jar = home .. "/workspaces/utils/lombok.jar"
+-- Verify Lombok jar existence to avoid silent annotation processing failures.
+if (vim.loop.fs_stat(lombok_jar) == nil) then
+	vim.notify("Lombok jar not found at: " .. lombok_jar .. " (Lombok annotations may not be processed)",
+		vim.log.levels.WARN)
+end
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local jdtls_path = home .. "/workspaces/utils/jdtls"
+
+-- Verify JDTLS path exists
+if vim.fn.isdirectory(jdtls_path) ~= 1 then
+	vim.notify("JDTLS directory not found at: " .. jdtls_path, vim.log.levels.ERROR)
+	return {}
+end
+
+-- print("jdtls_path:", vim.inspect(jdtls_path))
+
+
+-- Find launcher jar more explicitly to ensure it exists
+local launchers = {}
+local launcher_glob = jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"
+local launcher_result = vim.fn.glob(launcher_glob, true)
+
+if launcher_result ~= "" then
+	launchers = {launcher_result}
+else
+	vim.notify("JDTLS launcher jar not found at: " .. launcher_glob, vim.log.levels.ERROR)
+	return {}
+end
+-- local launchers = vim.fn.glob(launcher_glob, true, true)
+table.sort(launchers)
+
+-- Ensure we have a valid launcher before proceeding
+if #launchers == 0 then
+	vim.notify("No JDTLS launcher found. JDTLS will not start.", vim.log.levels.ERROR)
+	return {}
+end
+
+local launcher_jar = launchers[#launchers] -- Use the last one (most recent by alphabetical order)
+local config_dir = jdtls_path .. "/config_mac"
+
+-- Verify config directory exists
+if vim.loop.fs_stat(config_dir) == nil then
+	vim.notify("JDTLS config directory not found: " .. config_dir, vim.log.levels.ERROR)
+	return {}
+end
+local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+
+
+-- print("launchers:", vim.inspect(launchers))
+-- print("launcher_jar:", vim.inspect(launcher_jar))
+-- Build command array. Lombok requires both -javaagent and -Xbootclasspath/a for full processing.
+local java_cmd = {
+	java_binary,
+	"-javaagent:" .. lombok_jar,
+	-- "-Xbootclasspath/a:" .. lombok_jar,
+	"-Declipse.application=org.eclipse.jdt.ls.core.id1",
+	"-Dosgi.bundles.defaultStartLevel=4",
+	"-Declipse.product=org.eclipse.jdt.ls.core.product",
+	"-Dlog.level=ALL",
+	"-Dorg.eclipse.jdt.ls.java.home=" .. java_home,
+	"-Djava.home=" .. java_home,
+	"-Xms512m",
+	"-Xmx2G",
+	"--add-modules=ALL-SYSTEM,java.compiler",
+	"--add-opens", "java.compiler/javax.annotation.processing=ALL-UNNAMED",
+	"--add-opens", "java.base/java.util=ALL-UNNAMED",
+	"--add-opens", "java.base/java.lang=ALL-UNNAMED",
+	"-jar", launcher_jar,
+	"-configuration", config_dir,
+	"-data", workspace_dir
+}
+-- print("java_cmd:", vim.inspect(java_cmd))
+
+-- Autocomando para cargar JDTLS cuando se abra un archivo Java
+vim.api.nvim_create_autocmd({"FileType"}, {
+	pattern = {"java"},
+	callback = function()
+		-- Asegurar que el buffer es válido
+		if not vim.api.nvim_buf_is_valid(0) then return end
+
+		-- Verificar si ya hay un cliente LSP activo para este buffer
+		local clients = vim.lsp.get_active_clients({bufnr = 0})
+		for _, client in ipairs(clients) do
+			if client.name == "jdtls" then
+				vim.notify("JDTLS ya está activo para este buffer", vim.log.levels.INFO)
+				return
+			end
+		end
+
+		-- Verificar que es un archivo Java válido
+		local filename = vim.api.nvim_buf_get_name(0)
+		if filename:match("%.java$") then
+			vim.notify("Detectado archivo Java: " .. vim.fn.fnamemodify(filename, ":t") .. ". Iniciando JDTLS...", vim.log.levels.INFO)
+			-- Cargar JDTLS para este buffer
+			pcall(require, "jdtls")
+		end
+	end
+})
+
+-- Create commands for JDTLS diagnosis and maintenance
+
+-- Command to diagnose JDTLS installation
+vim.api.nvim_create_user_command("JdtDiagnose", function()
+	-- Display Java and JDTLS information
+	local java_home_val = os.getenv("JAVA_HOME") or "not set"
+	vim.notify("Java home: " .. java_home_val, vim.log.levels.INFO)
+	vim.notify("Java binary: " .. (java_binary or "not initialized"), vim.log.levels.INFO)
+	vim.notify("JDTLS path: " .. (jdtls_path or "not initialized"), vim.log.levels.INFO)
+
+	local lombok_exists = "unknown"
+	if lombok_jar and vim.fn.filereadable(lombok_jar) == 1 then
+		lombok_exists = "yes"
+	else
+		lombok_exists = "no"
+	end
+	vim.notify("Lombok jar: " .. (lombok_jar or "not initialized") .. " (exists: " .. lombok_exists .. ")", vim.log.levels.INFO)
+
+	local launcher_exists = "unknown"
+	if launcher_jar and vim.fn.filereadable(launcher_jar) == 1 then
+		launcher_exists = "yes"
+	else
+		launcher_exists = "no"
+	end
+	vim.notify("Launcher jar: " .. (launcher_jar or "not initialized") .. " (exists: " .. launcher_exists .. ")", vim.log.levels.INFO)
+
+	local config_exists = "unknown"
+	if config_dir and vim.fn.isdirectory(config_dir) == 1 then
+		config_exists = "yes"
+	else
+		config_exists = "no"
+	end
+	vim.notify("Config dir: " .. (config_dir or "not initialized") .. " (exists: " .. config_exists .. ")", vim.log.levels.INFO)
+
+	local workspace_exists = "unknown"
+	if workspace_dir and vim.fn.isdirectory(workspace_dir) == 1 then
+		workspace_exists = "yes"
+	else
+		workspace_exists = "no"
+	end
+	vim.notify("Workspace dir: " .. (workspace_dir or "not initialized") .. " (exists: " .. workspace_exists .. ")", vim.log.levels.INFO)
+
+	-- Check JDTLS plugin installation
+	local jdtls_plugin_path = vim.fn.stdpath('data') .. '/lazy/nvim-jdtls'
+	local jdtls_plugin_exists = vim.fn.isdirectory(jdtls_plugin_path) == 1
+	vim.notify("JDTLS plugin: " .. jdtls_plugin_path .. " (exists: " .. tostring(jdtls_plugin_exists) .. ")", vim.log.levels.INFO)
+
+	-- Mostrar el tipo de proyecto actual
+	vim.notify("Directorio actual: " .. vim.fn.getcwd(), vim.log.levels.INFO)
+	local is_java = false
+	local root_markers = { "pom.xml", "build.gradle", "settings.gradle", "gradlew", "mvnw", ".classpath", ".project" }
+	for _, marker in ipairs(root_markers) do
+		if vim.fn.filereadable(vim.fn.getcwd() .. "/" .. marker) == 1 then
+			is_java = true
+			vim.notify("Marcador de proyecto Java encontrado: " .. marker, vim.log.levels.INFO)
+			break
+		end
+	end
+	if not is_java then
+		local java_files = vim.fn.glob(vim.fn.getcwd() .. "/**/*.java", false, true)
+		if #java_files > 0 then
+			vim.notify("Encontrados " .. #java_files .. " archivos Java", vim.log.levels.INFO)
+			is_java = true
+		end
+	end
+	vim.notify("¿Es un proyecto Java?: " .. tostring(is_java), vim.log.levels.INFO)
+end, {})
+
+-- Command to clean JDTLS workspace
+vim.api.nvim_create_user_command("JdtCleanWorkspace", function()
+	local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+	local ws_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
+
+	-- Check if workspace directory exists
+	if vim.fn.isdirectory(ws_dir) == 1 then
+		-- Confirm with user before deleting
+		vim.ui.select({"Sí", "No"}, {
+			prompt = "¿Eliminar directorio de workspace JDTLS? " .. ws_dir
+		}, function(choice)
+			if choice == "Sí" then
+				-- Stop JDTLS server if running
+				pcall(function() vim.cmd("LspStop jdtls") end)
+
+				-- Use rm command to delete directory
+				local cmd = "rm -rf " .. vim.fn.shellescape(ws_dir)
+				local success = os.execute(cmd)
+
+				if success then
+					vim.notify("Workspace JDTLS eliminado con éxito: " .. ws_dir, vim.log.levels.INFO)
+				else
+					vim.notify("Error al eliminar workspace JDTLS: " .. ws_dir, vim.log.levels.ERROR)
+				end
+			end
+		end)
+	else
+		vim.notify("Workspace JDTLS no encontrado: " .. ws_dir, vim.log.levels.WARN)
+	end
+end, {})
+
+return {
+	'mfussenegger/nvim-jdtls', -- Java LSP integration
+	config = function()
+		-- Helper: create user commands for introspection and manual refresh.
+		local function on_attach(_client, bufnr)
+			-- Verify buffer exists and is loaded
+			if not vim.api.nvim_buf_is_valid(bufnr) then
+				vim.notify("JDTLS tried to attach to invalid buffer: " .. bufnr, vim.log.levels.WARN)
+				return
+			end
+
+			-- Verificar que el buffer es un archivo Java
+			local filename = vim.api.nvim_buf_get_name(bufnr)
+			local is_java_file = filename:match("%.java$")
+			if not is_java_file then
+				vim.notify("JDTLS se ha adjuntado a un archivo no-Java: " .. filename, vim.log.levels.WARN)
+			end
+
+			-- Mostrar mensaje de conexión exitosa
+			vim.notify(
+				"JDTLS conectado exitosamente al buffer: " .. vim.fn.fnamemodify(filename, ":t"),
+				vim.log.levels.INFO
+			)
+			-- Show the java_home currently in use.
+			vim.api.nvim_create_user_command("JdtJavaHome", function()
+				vim.notify("JDTLS java_home=" .. java_home, vim.log.levels.INFO)
+			end, {})
+
+			-- Manual refresh workaround (since java.build.workspace command not available).
+			vim.api.nvim_create_user_command("JdtRefresh", function()
+				pcall(function() vim.lsp.buf.workspace_symbol("") end)
+				vim.notify("Requested workspace symbol to encourage diagnostic refresh",
+					vim.log.levels.INFO)
+				local diags = vim.diagnostic.get(bufnr)
+				vim.notify("Current buffer diagnostics count: " .. tostring(#diags), vim.log.levels.INFO)
+			end, {})
+
+			-- Show root_dir / workspace_dir / log file path.
+			vim.api.nvim_create_user_command("JdtPaths", function()
+				local ws = workspace_dir
+				local log = ws .. "/.metadata/.log"
+				vim.notify("root_dir=" .. require('jdtls.setup').find_root({ 'settings.gradle','build.gradle','pom.xml','.git','mvnw','gradlew' })
+					.. "\nworkspace_dir=" .. ws .. "\nlog=" .. log, vim.log.levels.INFO)
+			end, {})
+
+			-- Open JDTLS log in a new split if exists.
+			vim.api.nvim_create_user_command("JdtLogOpen", function()
+				local log = workspace_dir .. "/.metadata/.log"
+				if vim.loop.fs_stat(log) then
+					vim.cmd("vsplit " .. log)
+				else
+					vim.notify("Log file not found: " .. log, vim.log.levels.WARN)
+				end
+			end, {})
+
+			-- Try to request classpaths (may vary by server version).
+			vim.api.nvim_create_user_command("JdtClasspath", function()
+				local uri = vim.uri_from_fname(vim.loop.cwd())
+				vim.lsp.buf_request(0, 'workspace/executeCommand', {
+					command = 'java.project.getClasspaths',
+					arguments = { uri, false }
+				}, function(_, res)
+					if res then
+						vim.notify("Classpaths:\n" .. vim.inspect(res), vim.log.levels.INFO)
+					else
+						vim.notify("No classpath response (unsupported or empty).", vim.log.levels.WARN)
+					end
+				end)
+			end, {})
+		end
+
+		local extended_capabilities = require('jdtls').extendedClientCapabilities
+		extended_capabilities.resolveAdditionalTextEditsSupport = true
+		extended_capabilities.progressReportProvider = true
+		extended_capabilities.classFileContentsSupport = true
+
+		local bundles = {
+			-- vim.fn.glob(
+			-- 	"/var/devlibs/org.eclipse.jdt.junit4.runtime*.jar",
+			-- 	true),
+			-- vim.fn.glob(
+			-- 	"/var/devlibs/org.eclipse.jdt.junit5.runtime*.jar",
+			-- true),
+			-- vim.fn.glob("/var/devlibs/org.eclipse.jdt.junit4.runtime*.jar", true),
+			vim.fn.glob("/var/devlibs/org.eclipse.jdt.junit5.runtime*.jar", true),
+			vim.fn.glob("/var/devlibs/com.microsoft.java.test.plugin-*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-jupiter-api_*.jar", true),
+			vim.fn.glob("/var/devlibs/org.jacoco.core_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-jupiter-migrationsupport_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-jupiter-params_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-commons_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-engine_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-launcher_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-runner_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-suite-api_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-suite-commons_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-platform-suite-engine_*.jar", true),
+			vim.fn.glob("/var/devlibs/junit-vintage-engine_*.jar", true),
+			vim.fn.glob("/var/devlibs/org.apiguardian.api_*.jar", true),
+			vim.fn.glob("/var/devlibs/org.opentest4j_*.jar", true)
+		}
+
+		local function is_java_project()
+			-- Verificar marcadores de proyecto Java
+			local root_markers = { "pom.xml", "build.gradle", "settings.gradle", "gradlew", "mvnw", ".classpath", ".project" }
+			local cwd = vim.fn.getcwd()
+
+			-- Imprimir información de depuración
+			vim.notify("Verificando proyecto Java en: " .. cwd, vim.log.levels.INFO)
+
+			-- Revisar por marcadores de proyecto
+			for _, marker in ipairs(root_markers) do
+				local marker_path = cwd .. "/" .. marker
+				if vim.fn.filereadable(marker_path) == 1 then
+					vim.notify("Marcador de proyecto Java encontrado: " .. marker_path, vim.log.levels.INFO)
+					return true
+				end
+			end
+
+			-- Buscar archivos Java en el directorio y subdirectorios
+			local java_files = vim.fn.glob(cwd .. "/**/*.java", false, true)
+			if #java_files > 0 then
+				vim.notify("Encontrados " .. #java_files .. " archivos Java", vim.log.levels.INFO)
+				return true
+			end
+
+			vim.notify("No se encontró un proyecto Java en el directorio actual", vim.log.levels.WARN)
+			return false
+		end
+
+		-- Verificar explícitamente si estamos en un proyecto Java
+		local is_java = is_java_project()
+
+		-- Mostrar un mensaje claro si no es un proyecto Java
+		if not is_java then
+			vim.notify(
+				"JDTLS no se ha iniciado porque el directorio actual no es un proyecto Java.\n" ..
+				"Directorio actual: " .. vim.fn.getcwd() .. "\n" ..
+				"Para iniciar JDTLS, abre un archivo .java o navega a un proyecto Java.",
+				vim.log.levels.INFO
+			)
+			return
+		end
+
+		-- El código solo llega aquí si es un proyecto Java
+		vim.notify("Iniciando JDTLS para el proyecto: " .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t'), vim.log.levels.INFO)
+
+		-- Añadir un pequeño retraso para asegurar que todo esté cargado
+		vim.defer_fn(function()
+			-- Create capabilities with workspace support
+			local lsp_capabilities = vim.lsp.protocol.make_client_capabilities()
+			lsp_capabilities.workspace = lsp_capabilities.workspace or {}
+			lsp_capabilities.workspace.workspaceFolders = {
+				supported = true,
+				changeNotifications = true
+			}
+
+			-- Verify we are in a Java project before continuing
+			if vim.fn.filereadable(launcher_jar) ~= 1 then
+				vim.notify("JDTLS launcher jar not found: " .. (launcher_jar or "nil"), vim.log.levels.ERROR)
+				return
+			end
+
+			if vim.fn.isdirectory(config_dir) ~= 1 then
+				vim.notify("JDTLS config directory not found: " .. (config_dir or "nil"), vim.log.levels.ERROR)
+				return
+			end
+
+			-- Verificar que estamos en un proyecto Java real antes de continuar
+			vim.notify("JDTLS: Iniciando en " .. vim.fn.getcwd(), vim.log.levels.INFO)
+
+			-- Create workspace directory if it doesn't exist
+			if vim.fn.isdirectory(workspace_dir) ~= 1 then
+				vim.fn.mkdir(workspace_dir, "p")
+				vim.notify("Created JDTLS workspace directory: " .. workspace_dir, vim.log.levels.INFO)
+			end
+
+			-- Add error handling for JDTLS startup
+			local jdtls_ok, jdtls = pcall(require, 'jdtls')
+			if not jdtls_ok then
+				vim.notify("Failed to require jdtls. Is the plugin installed? Error: " .. (jdtls or ""), vim.log.levels.ERROR)
+				return
+			end
+
+			-- Debug logging for JDTLS
+			vim.notify("Starting JDTLS with cmd: " .. java_cmd[1], vim.log.levels.INFO)
+			vim.notify("Using launcher: " .. launcher_jar, vim.log.levels.INFO)
+
+			-- Use pcall to catch JDTLS initialization errors
+			local status, err = pcall(function()
+				jdtls.start_or_attach({
+				cmd = java_cmd,
+				root_dir = require('jdtls.setup').find_root({ 'settings.gradle', 'build.gradle', 'pom.xml', '.git', 'mvnw', 'gradlew' }),
+				on_attach = on_attach,
+				capabilities = lsp_capabilities,
+				init_options = {
+					extendedClientCapabilities = extended_capabilities,
+					bundles = bundles
+				},
+				settings = {
+					java = {
+						configuration = {
+							updateBuildConfiguration = "automatic",
+							runtimes = {
+								{
+									name = "JavaSE-21",
+									path = java_home,
+									default = true,
+								},
+							},
+						},
+						autobuild = { enabled = true },
+						import = {
+							gradle = {
+								enabled = true,
+								java = {
+									home = java_home,
+								},
+								wrapper = {
+									enabled = true,
+								},
+							},
+						},
+					}
+				}
+			})
+			end)
+
+			-- Handle any startup errors
+			if not status then
+				vim.notify("JDTLS startup error: " .. (err or "Unknown error"), vim.log.levels.ERROR)
+			end
+		end, 300) -- Espera 300ms antes de iniciar JDTLS
+	end
+}
