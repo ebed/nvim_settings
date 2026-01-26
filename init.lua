@@ -1,12 +1,9 @@
 require("config.base_settings")
-require("utils.folding")
 vim.cmd("colorscheme desert")
 vim.opt.shell = "bash"
 vim.opt.shellcmdflag = "-c"
-vim.cmd "autocmd User TelescopePreviewerLoaded setlocal number"
+vim.cmd("autocmd User TelescopePreviewerLoaded setlocal number")
 vim.g.loaded_perl_provider = 0
--- vim.opt.autoindent = true
--- vim.opt.smartindent = true
 require("config.lazy")
 require("config.basics")
 require("config.cmp")
@@ -16,20 +13,24 @@ require("config.telescope")
 require("config.mappings")
 -- require('config.kafka.kafka')
 -- require("jdtls_config_simple")
+require("config.lspconfig")
+-- Sistema de mantenimiento de caché para evitar errores ENOSPC
+require("utils.cache_maintenance").setup()
 
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "json" },
-	callback = function()
-		vim.api.nvim_set_option_value("formatprg", "jq", { scope = 'local' })
-	end,
+  pattern = { "json" },
+  callback = function()
+    vim.api.nvim_set_option_value("formatprg", "jq", { scope = "local" })
+  end,
 })
-
--- vim.api.nvim_create_autocmd("VimEnter", {
---   once = true,
---   callback = function()
---     vim.cmd("CopilotTicket")
---   end,
--- })
--- vim.cmd("colorscheme kanagawa-wave")
-require("config.lspconfig")
--- require("autocmds.neotreecmds")
+-- require("utils.db_sql_maps")
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  pattern = { "elixir", "heex", "eex" },
+  callback = function(ev)
+    -- Intenta iniciar treesitter de forma segura
+    local status, _ = pcall(vim.treesitter.start, ev.buf)
+    if not status then
+      print("Error iniciando Tree-sitter en buffer: " .. ev.buf)
+    end
+  end,
+})

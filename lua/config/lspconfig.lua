@@ -1,172 +1,154 @@
-pcall(require, "java") -- Esto asegura que el módulo esté cargado
+local home = vim.env.HOME
+local extra_paths = {
+  home .. "/.asdf/shims",
+  home .. "/.asdf/bin",
+  home .. "/.rbenv/shims",
+  home .. "/.rbenv/bin",
+}
+for _, p in ipairs(extra_paths) do
+  if vim.fn.isdirectory(p) == 1 and not string.find(vim.env.PATH or "", p, 1, true) then
+    vim.env.PATH = p .. ":" .. vim.env.PATH
+  end
+end
+-- Asegura jdtls aparte si usas Java
+pcall(require, "java")
 
 local mason_lspconfig = require("mason-lspconfig")
 
--- Lista de servidores a instalar y configurar
-local servers = {
-	"solargraph", -- Ruby
-	-- "elixirls", -- Elixir
-	-- "nextls",
-	"emmylua_ls",
-	"expert",
-	"pyright", -- Python
-	"terraformls", -- Terraform
-	"yamlls", -- YAML
-}
-
--- Configuración de capacidades del cliente LSP
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-capabilities.textDocument.completion.completionItem.resolveSupport = {
-	properties = { "documentation", "detail", "additionalTextEdits" },
-}
-
--- Add explicit workspace folder support
-capabilities.workspace = capabilities.workspace or {}
-capabilities.workspace.workspaceFolders = {
-	supported = true,
-	changeNotifications = true
-}
-capabilities.textDocument.codeAction = {
-	dynamicRegistration = false,
-	codeActionLiteralSupport = {
-		codeActionKind = {
-			valueSet = {
-				"",
-				"quickfix",
-				"refactor",
-				"refactor.extract",
-				"refactor.inline",
-				"refactor.rewrite",
-				"source",
-				"source.organizeImports",
-			},
-		},
-	},
-}
-
---
--- Configuración de Mason para instalar servidores automáticamente
+-- Mason install
 mason_lspconfig.setup({
-	ensure_installed = servers,
+  ensure_installed = { "ruby_lsp", "elixirls", "lua_ls", "pyright", "terraformls", "yamlls", "bashls", "dockerls" },
+  automatic_installation = false,
 })
 
--- Configuración específica para cada servidor
-local server_configs = {
-	solargraph = {
-		settings = {
-			solargraph = {
-				diagnostics = true,
-				formatting = true,
-				completion = true,
-				useBundler = false,
-			},
-		},
-	},
-	emmylua_ls = {
-		settings = {
-			Lua = {
-				library = {
-					vim.env.VIMRUNTIME,
-					vim.fn.expand("~/.local/share/nvim/lazy/"),
-				},
-				diagnostics = {
-					globals = { "vim" },
-				},
-			},
-		},
-	},
-	-- jdtls = {},
-	lua_ls = {
-		settings = {
-			Lua = {
-				runtime = {
-					version = "LuaJIT",
-					path = vim.split(package.path, ";"),
-				},
-				diagnostics = {
-					globals = { "vim" },
-				},
-				workspace = {
-					-- library = vim.api.nvim_get_runtime_file("", true),
-					library = {
-						vim.env.VIMRUNTIME,
-						vim.fn.expand("~/.local/share/nvim/lazy/"),
-					},
-					checkThirdParty = false,
-				},
-				telemetry = {
-					enable = false,
-				},
-				format = {
-					enable = true,
-					defaultConfig = {
-						indent_style = "space",
-						indent_size = "2",
-					},
-				},
-			},
-		},
-	},
-	pyright = {
-		settings = {
-			python = {
-				analysis = {
-					typeCheckingMode = "basic", -- Cambia a "off" para desactivar la verificación de tipos
-					autoImportCompletions = true,
-					useLibraryCodeForTypes = true,
-				},
-			},
-		},
-	},
-	expert = {
-		env = {
-			MIX_ENV = "test"
-		},
-		-- Asegúrate de que detecte la raíz del proyecto correctamente
-		-- root_dir = lspconfig.util.root_pattern("mix.exs", ".git"),
-	},
-	-- elixirls = {
-	-- 	cmd = { "/opt/homebrew/bin/elixir-ls" },
-	-- 	settings = {
-	-- 		elixirLS = {
-	-- 			dialyzerEnabled = true,
-	-- 			fetchDeps = false,
-	-- 			enableTestLenses = true,
-	-- 			suggestSpecs = true,
-	-- 			projectionist = true,
-	--
-	-- 		},
-	-- 	},
-	-- },
+-- Capacidades
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Diagnósticos
+vim.diagnostic.config({
+  virtual_text = false,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+})
+-- Helper para detectar si usar Bundler
+local function ruby_cmd()
+  local uv = vim.uv or vim.loop
+  local in_bundle = uv.fs_stat("Gemfile.lock") ~= nil
+  if in_bundle and vim.fn.executable("bundle") == 1 then
+    return { "bundle", "exec", "ruby-lsp" }
+  end
+  return { "ruby-lsp" }
+end
+-- Logging moderado
+vim.lsp.log.set_level(vim.log.levels.ERROR)
+
+-- Formateo permitido por LSP (si usas conform.nvim, déjalo mínimo)
+local allow_formatting = {
+  lua_ls = true,
+  terraformls = true,
 }
 
--- Función común para configurar keymaps al adjuntar un cliente LSP
+-- on_attach común
 local function on_attach(client, bufnr)
-	-- Verify buffer exists and is loaded
-	if not vim.api.nvim_buf_is_valid(bufnr) then
-		vim.notify("LSP tried to attach to invalid buffer: " .. bufnr, vim.log.levels.WARN)
-		return
-	end
-
-	client.server_capabilities.documentFormattingProvider = true
-	vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+  if not allow_formatting[client.name] then
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end
+  if vim.api.nvim_buf_is_valid(bufnr) then
+    vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+  end
+  if vim.lsp.inlay_hint then
+    pcall(vim.lsp.inlay_hint.enable, bufnr, true)
+  end
+  -- Keymaps básicos
+  local map = function(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+  end
+  map("n", "gd", vim.lsp.buf.definition, "Goto Definition")
+  map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
+  map("n", "gr", vim.lsp.buf.references, "References")
+  map("n", "gi", vim.lsp.buf.implementation, "Implementation")
+  map("n", "K", vim.lsp.buf.hover, "Hover")
+  map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
+  map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+  map("n", "[d", vim.diagnostic.goto_prev, "Prev diagnostic")
+  map("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
 end
--- Configure LSP logging level
--- Use one of the following:
--- vim.lsp.log.set_level(vim.log.levels.OFF)   -- Turn off logging
--- vim.lsp.log.set_level(vim.log.levels.ERROR) -- Only errors
--- vim.lsp.log.set_level(vim.log.levels.WARN)  -- Warnings and errors
--- vim.lsp.log.set_level(vim.log.levels.INFO)  -- Info, warnings, and errors
--- vim.lsp.log.set_level(vim.log.levels.DEBUG) -- Debug and all above
 
--- Use ERROR level for everyday use
-vim.lsp.log.set_level(vim.log.levels.ERROR)
--- Configuración genérica para todos los servidores
-for server, config in pairs(server_configs) do
-	vim.lsp.config(server, vim.tbl_deep_extend('force', {
-		capabilities = capabilities,
-		on_attach = on_attach,
-	}, config))
-	vim.lsp.enable(server)
+-- Configs por servidor (API nativa 0.11)
+local server_configs = {
+  ruby_lsp = {
+    cmd = ruby_cmd(),
+    filetypes = { "ruby" },
+    root_dir = function(bufnr)
+      return vim.fs.root(bufnr, { ".git", "Gemfile", ".ruby-version" }) or vim.fn.getcwd()
+    end,
+    init_options = {
+      formatter = "auto", -- usa rubocop si está el plugin; si no, syntax_tree
+    },
+    settings = {},
+  },
+  lua_ls = {
+    settings = {
+      Lua = {
+        runtime = { version = "LuaJIT" },
+        diagnostics = { globals = { "vim" } },
+        workspace = {
+          checkThirdParty = false,
+          library = {
+            vim.env.VIMRUNTIME,
+            vim.fn.expand("~/.local/share/nvim/lazy/"),
+          },
+        },
+        telemetry = { enable = false },
+      },
+    },
+  },
+
+  pyright = {
+    settings = {
+      python = {
+        analysis = {
+          typeCheckingMode = "basic",
+          autoImportCompletions = true,
+          useLibraryCodeForTypes = true,
+        },
+      },
+    },
+  },
+
+  terraformls = {},
+  yamlls = {
+    settings = {
+      yaml = {
+        keyOrdering = false,
+        format = { enable = true },
+        validate = true,
+        schemaStore = { enable = true },
+        schemas = {
+          kubernetes = { "/*.k8s.yaml", "/*-k8s.yaml", "k8s/*.yaml", "manifests/**/*.yaml" },
+          ["https://json.schemastore.org/github-workflow.json"] = ".github/workflows/*.yml",
+          ["https://json.schemastore.org/github-action.json"] = ".github/actions/**/action.{yml,yaml}",
+          ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "docker-compose*.{yml,yaml}",
+        },
+      },
+    },
+  },
+  bashls = {},
+  elixirls = {},
+  dockerls = {},
+}
+
+-- Registro y enable (SIN lspconfig para evitar duplicados)
+for name, cfg in pairs(server_configs) do
+  vim.lsp.config(
+    name,
+    vim.tbl_deep_extend("force", {
+      capabilities = capabilities,
+      on_attach = on_attach,
+    }, cfg)
+  )
+  vim.lsp.enable(name)
 end

@@ -4,8 +4,8 @@
 
 local opts = { noremap = true, silent = true }
 
-vim.keymap.set({'n', 'v', 's', 'o', 'i', 'c'}, '<C-A>', '<Home>')
-vim.keymap.set({'n', 'v', 's', 'o', 'i', 'c'}, '<C-E>', '<End>')
+vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<C-A>", "<Home>")
+vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<C-E>", "<End>")
 -- vim.api.nvim_set_keymap('n', '<CR>', [[:lua require('utils.neorg_utils').open_or_create_linked_file()<CR>]], { noremap = true, silent = true })
 -- === General ===
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
@@ -49,7 +49,8 @@ vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go 
 vim.keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "Go to declaration" })
 vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "Go to implementation" })
 vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "Go to references" })
-vim.keymap.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "Hover documentation" })
+-- Usando hover.nvim en lugar del hover de LSP estándar
+-- vim.keymap.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "Hover documentation" })
 vim.keymap.set("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "Rename symbol" })
 vim.keymap.set("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "Code action" })
 vim.keymap.set("n", "<leader>f", "<cmd>lua vim.lsp.buf.format({ async = true })<CR>", { desc = "Format buffer" })
@@ -91,9 +92,7 @@ vim.keymap.set("n", "<leader>gb", "<cmd>lua _GRADLE_BUILD_TOGGLE()<CR>", { desc 
 vim.keymap.set("n", "<leader>gr", "<cmd>lua _GRADLE_RUN_TOGGLE()<CR>", { desc = "Gradle Run" })
 vim.keymap.set("n", "<leader>et", "<cmd>lua _ELIXIR_MIX_TOGGLE()<CR>", { desc = "Elixir Mix" })
 
-vim.keymap.set('n', '!', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
-
-
+vim.keymap.set("n", "!", "<cmd>lua vim.diagnostic.open_float()<CR>", { noremap = true, silent = true })
 
 -- -- === Catppuccin Theme Switching ===
 -- vim.keymap.set("n", "<leader>cl", function()
@@ -123,40 +122,64 @@ vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "To
 vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
 vim.keymap.set("n", "<leader>z", "<cmd>ZenMode<CR>", { desc = "Toggle Zen Mode" })
 
-
-
-
-vim.keymap.set({'x', 'o'}, 'R',  function ()
-  require('leap.treesitter').select {
+vim.keymap.set({ "x", "o" }, "R", function()
+  require("leap.treesitter").select({
     -- To increase/decrease the selection in a clever-f-like manner,
     -- with the trigger key itself (vRRRRrr...). The default keys
     -- (<enter>/<backspace>) also work, so feel free to skip this.
-    opts = require('leap.user').with_traversal_keys('R', 'r')
-  }
+    opts = require("leap.user").with_traversal_keys("R", "r"),
+  })
 end)
 
 -- === JDTLS Java LSP Actions ===
 vim.keymap.set("n", "<A-o>", "<Cmd>lua require'jdtls'.organize_imports()<CR>", { desc = "JDTLS: Organize Imports" })
 vim.keymap.set("n", "crv", "<Cmd>lua require('jdtls').extract_variable()<CR>", { desc = "JDTLS: Extract Variable" })
-vim.keymap.set("v", "crv", "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>", { desc = "JDTLS: Extract Variable (visual)" })
+vim.keymap.set(
+  "v",
+  "crv",
+  "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>",
+  { desc = "JDTLS: Extract Variable (visual)" }
+)
 vim.keymap.set("n", "crc", "<Cmd>lua require('jdtls').extract_constant()<CR>", { desc = "JDTLS: Extract Constant" })
-vim.keymap.set("v", "crc", "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>", { desc = "JDTLS: Extract Constant (visual)" })
-vim.keymap.set("v", "crm", "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>", { desc = "JDTLS: Extract Method (visual)" })
+vim.keymap.set(
+  "v",
+  "crc",
+  "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>",
+  { desc = "JDTLS: Extract Constant (visual)" }
+)
+vim.keymap.set(
+  "v",
+  "crm",
+  "<Esc><Cmd>lua require('jdtls').extract_method(true)<CR>",
+  { desc = "JDTLS: Extract Method (visual)" }
+)
 -- === JDTLS DAP (Debug Adapter Protocol) ===
 vim.keymap.set("n", "<leader>df", "<Cmd>lua require'jdtls'.test_class()<CR>", { desc = "JDTLS: Test Class" })
-vim.keymap.set("n", "<leader>dn", "<Cmd>lua require'jdtls'.test_nearest_method()<CR>", { desc = "JDTLS: Test Nearest Method" })
+vim.keymap.set(
+  "n",
+  "<leader>dn",
+  "<Cmd>lua require'jdtls'.test_nearest_method()<CR>",
+  { desc = "JDTLS: Test Nearest Method" }
+)
 -- vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
 -- vim.keymap.set('n',             'S', '<Plug>(leap-from-window)')
 
-
-
 -- === ELIXIR TOOLS and TEST ===
--- 
-vim.keymap.set('n', '<leader>Te', '<cmd>lua require("neotest").run.run()<CR>', { desc = "Run Tests on file" })
-vim.keymap.set('n', '<leader>Ta', '<cmd>lua require("neotest").run.run({suite = true})<CR>', { desc = "Run Test Suite" })
-vim.keymap.set('n', '<leader>Tc', '<cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>', { desc = "Run Test Current File" })
-vim.keymap.set('n', '<leader>Ts', '<cmd>Neotest summary<CR>', { desc = "Test Summary" })
-
+--
+vim.keymap.set("n", "<leader>Te", '<cmd>lua require("neotest").run.run()<CR>', { desc = "Run Tests on file" })
+vim.keymap.set(
+  "n",
+  "<leader>Ta",
+  '<cmd>lua require("neotest").run.run({suite = true})<CR>',
+  { desc = "Run Test Suite" }
+)
+vim.keymap.set(
+  "n",
+  "<leader>Tc",
+  '<cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>',
+  { desc = "Run Test Current File" }
+)
+vim.keymap.set("n", "<leader>Ts", "<cmd>Neotest summary<CR>", { desc = "Test Summary" })
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "http",
@@ -164,8 +187,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "<leader>r", "<cmd>Rest run<cr>", { buffer = true, desc = "Run HTTP request" })
   end,
 })
- 
-
 
 -- Add more mappings as needed, following the documented group structure above.
 

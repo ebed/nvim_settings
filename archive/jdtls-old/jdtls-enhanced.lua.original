@@ -12,33 +12,11 @@ local lsp_env_script = home .. "/.config/nvim/java_env_lsp.sh"
 local diagnostic_script = home .. "/.config/nvim/java_env.sh"
 local lombok_enabled = vim.fn.filereadable(lombok_jar) == 1
 
--- Función para buscar plugins de Debugging (DAP)
+-- Función para buscar plugins de Debugging (DAP) - versión segura
 local function find_bundles()
     local bundles = {}
-    local has_mason, mason_registry = pcall(require, "mason-registry")
 
-    -- Intentar cargar bundle desde Mason si está disponible
-    if has_mason then
-        local package = mason_registry.get_package("java-debug-adapter")
-        if package then
-            local path = package:get_install_path()
-            local debug_bundles = vim.fn.glob(path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar", true)
-            if debug_bundles ~= "" then
-                vim.list_extend(bundles, vim.split(debug_bundles, "\n"))
-            end
-        end
-
-        package = mason_registry.get_package("java-test")
-        if package then
-            local path = package:get_install_path()
-            local test_bundles = vim.fn.glob(path .. "/extension/server/*.jar", true)
-            if test_bundles ~= "" then
-                vim.list_extend(bundles, vim.split(test_bundles, "\n"))
-            end
-        end
-    end
-
-    -- Buscar bundles locales
+    -- Buscar bundles locales primero (no depende de Mason)
     local debug_path = home .. "/workspaces/utils/java-debug"
     local test_path = home .. "/workspaces/utils/vscode-java-test"
 
@@ -55,6 +33,55 @@ local function find_bundles()
         local test_bundles = vim.fn.glob(test_path .. "/server/*.jar", true)
         if test_bundles ~= "" then
             vim.list_extend(bundles, vim.split(test_bundles, "\n"))
+        end
+    end
+
+    -- Intentar cargar bundle desde Mason si está disponible
+    local has_mason, mason_registry = pcall(require, "mason-registry")
+    if has_mason then
+        -- Verificar si mason-registry tiene el método get_package
+        if type(mason_registry.get_package) == "function" then
+            -- Verificar si java-debug-adapter está disponible
+            local ok, package = pcall(mason_registry.get_package, "java-debug-adapter")
+            if ok and package and type(package.get_install_path) == "function" then
+                local path = package:get_install_path()
+                local debug_bundles = vim.fn.glob(path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar", true)
+                if debug_bundles ~= "" then
+                    vim.list_extend(bundles, vim.split(debug_bundles, "\n"))
+                end
+            end
+
+            -- Verificar si java-test está disponible
+            ok, package = pcall(mason_registry.get_package, "java-test")
+            if ok and package and type(package.get_install_path) == "function" then
+                local path = package:get_install_path()
+                local test_bundles = vim.fn.glob(path .. "/extension/server/*.jar", true)
+                if test_bundles ~= "" then
+                    vim.list_extend(bundles, vim.split(test_bundles, "\n"))
+                end
+            end
+        end
+    end
+
+    -- Buscar en ubicaciones estándar de Mason como fallback
+    local mason_path = vim.fn.stdpath("data") .. "/mason/packages"
+    if vim.fn.isdirectory(mason_path) == 1 then
+        -- Buscar java-debug-adapter
+        local debug_path = mason_path .. "/java-debug-adapter"
+        if vim.fn.isdirectory(debug_path) == 1 then
+            local debug_bundles = vim.fn.glob(debug_path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar", true)
+            if debug_bundles ~= "" then
+                vim.list_extend(bundles, vim.split(debug_bundles, "\n"))
+            end
+        end
+
+        -- Buscar java-test
+        local test_path = mason_path .. "/java-test"
+        if vim.fn.isdirectory(test_path) == 1 then
+            local test_bundles = vim.fn.glob(test_path .. "/extension/server/*.jar", true)
+            if test_bundles ~= "" then
+                vim.list_extend(bundles, vim.split(test_bundles, "\n"))
+            end
         end
     end
 
@@ -252,7 +279,7 @@ public class Main {
                     return
                 end
 
-                -- Intentar cargar los bundles para debugging
+                -- Intentar cargar los bundles para debugging de manera segura
                 local bundles = find_bundles()
 
                 -- Configuración avanzada
@@ -357,41 +384,61 @@ public class Main {
 
                 local bufopts = { noremap = true, silent = true, buffer = bufnr }
 
-                -- Keybindings Java-específicos
-                nnoremap("<leader>jo", jdtls.organize_imports, bufopts, "Organizar imports")
-                nnoremap("<leader>jv", jdtls.extract_variable, bufopts, "Extraer variable")
-                nnoremap("<leader>jc", jdtls.extract_constant, bufopts, "Extraer constante")
-                nnoremap("<leader>jm", jdtls.extract_method, bufopts, "Extraer método")
-                nnoremap("<leader>jt", jdtls.test_nearest_method, bufopts, "Test método más cercano")
-                nnoremap("<leader>jT", jdtls.test_class, bufopts, "Test clase")
+                -- Keybindings Java-específicos - verificar que existen los métodos
+                if type(jdtls.organize_imports) == "function" then
+                    nnoremap("<leader>jo", jdtls.organize_imports, bufopts, "Organizar imports")
+                end
 
-                -- Formato automático al guardar
-                vim.api.nvim_create_autocmd("BufWritePre", {
-                    buffer = bufnr,
-                    callback = function()
-                        vim.lsp.buf.format({ bufnr = bufnr })
-                    end,
-                })
+                if type(jdtls.extract_variable) == "function" then
+                    nnoremap("<leader>jv", jdtls.extract_variable, bufopts, "Extraer variable")
+                end
+
+                if type(jdtls.extract_constant) == "function" then
+                    nnoremap("<leader>jc", jdtls.extract_constant, bufopts, "Extraer constante")
+                end
+
+                if type(jdtls.extract_method) == "function" then
+                    nnoremap("<leader>jm", jdtls.extract_method, bufopts, "Extraer método")
+                end
+
+                if type(jdtls.test_nearest_method) == "function" then
+                    nnoremap("<leader>jt", jdtls.test_nearest_method, bufopts, "Test método más cercano")
+                end
+
+                if type(jdtls.test_class) == "function" then
+                    nnoremap("<leader>jT", jdtls.test_class, bufopts, "Test clase")
+                end
+
+                -- -- Formato automático al guardar
+                -- vim.api.nvim_create_autocmd("BufWritePre", {
+                --     buffer = bufnr,
+                --     callback = function()
+                --         vim.lsp.buf.format({ bufnr = bufnr })
+                --     end,
+                -- })
 
                 -- Configurar DAP si está disponible
                 local has_dap, dap = pcall(require, 'dap')
                 if has_dap and #bundles > 0 then
-                    dap.configurations.java = {
-                        {
-                            type = 'java';
-                            request = 'attach';
-                            name = "Debug (Attach) - Remote";
-                            hostName = "127.0.0.1";
-                            port = 5005;
-                        },
-                        {
-                            type = 'java';
-                            request = 'launch';
-                            name = "Debug (Launch) - Current File";
-                            mainClass = "${file}";
-                            projectName = project_name;
+                    -- Verificar que no existan configuraciones previas
+                    if not dap.configurations.java then
+                        dap.configurations.java = {
+                            {
+                                type = 'java';
+                                request = 'attach';
+                                name = "Debug (Attach) - Remote";
+                                hostName = "127.0.0.1";
+                                port = 5005;
+                            },
+                            {
+                                type = 'java';
+                                request = 'launch';
+                                name = "Debug (Launch) - Current File";
+                                mainClass = "${file}";
+                                projectName = project_name;
+                            }
                         }
-                    }
+                    end
 
                     -- Debugging keybindings
                     nnoremap("<leader>jb", dap.toggle_breakpoint, bufopts, "Toggle breakpoint")
@@ -404,21 +451,26 @@ public class Main {
                     -- Configuración avanzada para DAP si nvim-dap-ui está disponible
                     local has_dapui, dapui = pcall(require, "dapui")
                     if has_dapui then
-                        dap.listeners.after.event_initialized["dapui_config"] = function()
-                            dapui.open()
-                        end
-                        dap.listeners.before.event_terminated["dapui_config"] = function()
-                            dapui.close()
-                        end
-                        dap.listeners.before.event_exited["dapui_config"] = function()
-                            dapui.close()
+                        -- Configurar solo si no está ya configurado
+                        if not dap.listeners.after.event_initialized["dapui_config"] then
+                            dap.listeners.after.event_initialized["dapui_config"] = function()
+                                dapui.open()
+                            end
+                            dap.listeners.before.event_terminated["dapui_config"] = function()
+                                dapui.close()
+                            end
+                            dap.listeners.before.event_exited["dapui_config"] = function()
+                                dapui.close()
+                            end
                         end
 
                         nnoremap("<leader>ju", dapui.toggle, bufopts, "Toggle DAP UI")
                     end
 
                     -- Configurar DAP con JDTLS
-                    jdtls.setup_dap({ hotcodereplace = 'auto' })
+                    if type(jdtls.setup_dap) == "function" then
+                        jdtls.setup_dap({ hotcodereplace = 'auto' })
+                    end
                 end
 
                 vim.notify("JDTLS iniciado " .. (lombok_enabled and "con" or "sin") .. " soporte para Lombok" .. (#bundles > 0 and " y debugging" or ""), vim.log.levels.INFO)
