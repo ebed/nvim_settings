@@ -159,6 +159,57 @@ Ver `ARCHITECTURE.md` sección "Troubleshooting".
 
 ---
 
+## ✅ JDTLS Message Spam (FIXED)
+
+### Síntoma (Resuelto)
+```
+Building
+Building
+Validate documents
+Publish Diagnostics
+(repetido cientos de veces)
+```
+
+También aparecía:
+```
+copilot: Unknown command: java.edit.organizeImports
+```
+
+### Causa
+- JDTLS envía mensajes de progreso excesivos
+- Copilot intentaba usar comando no existente `java.edit.organizeImports`
+
+### Solución Aplicada
+
+**Triple capa de filtrado**:
+
+1. **En JDTLS** (`lua/plugins/jdtls.lua`):
+   - Handler de `$/progress` que filtra mensajes repetitivos
+
+2. **En Snacks** (`lua/plugins/snacks.lua`):
+   - Filtro específico para JDTLS en `LspProgress`
+   - No muestra "Building", "Validate", "Publish Diagnostics"
+
+3. **Global** (`lua/config/jdtls_fixes.lua`):
+   - Override de `window/showMessage` y `window/logMessage`
+   - Suprime error de Copilot específicamente
+
+**Comando nuevo**:
+```vim
+:OrganizeImports    " Funciona para todos los lenguajes
+```
+
+### Keymaps de Copilot Actualizados
+
+```vim
+<M-l>       " Aceptar sugerencia
+<M-]>       " Siguiente sugerencia
+<M-[>       " Sugerencia anterior
+<C-]>       " Descartar sugerencia
+```
+
+---
+
 ## 📝 Reportar Nuevos Problemas
 
 Si encuentras un nuevo problema:
