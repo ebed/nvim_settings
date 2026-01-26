@@ -404,9 +404,19 @@ public class Main {
                             -- Opciones de code lens
                             implementationsCodeLens = { enabled = true },
                             referencesCodeLens = { enabled = true },
-                            -- Ignorar warnings de classpath incompleto
+                            -- Ignorar warnings de classpath incompleto y wildcards
                             errors = {
                                 incompleteClasspath = { severity = "ignore" }
+                            },
+                            -- Configuración de problemas/warnings del compilador
+                            compile = {
+                                nullAnalysis = {
+                                    mode = "automatic"
+                                }
+                            },
+                            -- Configuración específica para suprimir warnings de wildcards
+                            codeGeneration = {
+                                useBlocks = true,
                             },
                         }
                     },
@@ -431,6 +441,17 @@ public class Main {
                         end
                         -- Permitir otros mensajes de progreso
                         vim.lsp.handlers["$/progress"](_, result, ctx)
+                    end,
+
+                    -- Filtrar diagnósticos de wildcards en imports
+                    ["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+                        -- Usar filtro modular para wildcards
+                        local ok, diagnostic_filter = pcall(require, 'config.java_diagnostic_filter')
+                        if ok and result and result.diagnostics then
+                            result.diagnostics = diagnostic_filter.filter_diagnostics(result.diagnostics)
+                        end
+                        -- Llamar al handler por defecto con diagnósticos filtrados
+                        vim.lsp.handlers["textDocument/publishDiagnostics"](err, result, ctx, config)
                     end,
                 }
 

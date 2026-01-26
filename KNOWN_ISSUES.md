@@ -210,6 +210,59 @@ copilot: Unknown command: java.edit.organizeImports
 
 ---
 
+## ✅ Wildcard Import Warnings (FILTERED)
+
+### Síntoma (Resuelto)
+LSP muestra warnings sobre uso de wildcards en imports:
+```
+Avoid using wildcard imports
+Avoid on-demand imports
+```
+
+### Causa
+JDTLS, Checkstyle o PMD reportan warnings cuando usas `import java.util.*;`
+
+### Solución Aplicada
+
+**Filtro automático de diagnósticos**: Los warnings sobre wildcards son filtrados automáticamente.
+
+**Implementación**:
+- `lua/config/java_diagnostic_filter.lua`: Módulo de filtrado
+- `lua/plugins/jdtls.lua`: Handler de `textDocument/publishDiagnostics`
+
+**Patrones filtrados**:
+- "wildcard"
+- "avoid.*\*"
+- "on demand"
+- "star import"
+- "avoid using.*import"
+
+### Comandos
+
+```vim
+:ToggleWildcardWarnings  " Activar/desactivar filtro temporalmente
+```
+
+### Configuración
+
+**Deshabilitar permanentemente**:
+```lua
+-- lua/config/java_diagnostic_filter.lua
+M.config = {
+  enabled = false,  -- Cambiar a false
+}
+```
+
+**Agregar patrones personalizados**:
+```lua
+patterns = {
+  "wildcard",
+  "tu patrón personalizado",
+}
+```
+
+---
+
 ## 📝 Reportar Nuevos Problemas
 
 Si encuentras un nuevo problema:

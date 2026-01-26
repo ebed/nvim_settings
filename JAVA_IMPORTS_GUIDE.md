@@ -299,6 +299,36 @@ formatters_by_ft = {
 java_imports.organize_imports_with_wildcards(5)  -- Change 3 to 5
 ```
 
+### Wildcard import warnings
+
+**Problem**: LSP or linter shows warnings like "Avoid using wildcard imports" or "Avoid on-demand imports"
+
+**Solution**: These warnings are automatically filtered by default.
+
+**Toggle filtering**:
+```vim
+:ToggleWildcardWarnings   " Turn filtering on/off
+```
+
+**Permanently disable filtering**:
+Edit `lua/config/java_diagnostic_filter.lua`:
+```lua
+M.config = {
+  enabled = false,  -- Change to false
+  -- ...
+}
+```
+
+**Add custom patterns**:
+Edit `lua/config/java_diagnostic_filter.lua`:
+```lua
+patterns = {
+  "wildcard",
+  "avoid.*%*",
+  "your custom pattern",
+}
+```
+
 ## Related Files
 
 - `lua/utils/java_imports.lua`: Core logic

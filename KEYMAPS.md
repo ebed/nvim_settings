@@ -117,13 +117,14 @@
 ### Comandos
 
 ```vim
-:JavaInfo              " Ver configuración Java/JDTLS
-:JavaClean             " Limpiar workspace
-:JavaRestart           " Reiniciar JDTLS
-:JavaNewProject <name> " Crear proyecto Maven
-:OrganizeImports       " Organizar imports con wildcards (Java)
-:CollapseImports [N]   " Colapsar a wildcards (umbral: N, default 3)
-:SortImports           " Ordenar imports alfabéticamente (sin colapsar)
+:JavaInfo                " Ver configuración Java/JDTLS
+:JavaClean               " Limpiar workspace
+:JavaRestart             " Reiniciar JDTLS
+:JavaNewProject <name>   " Crear proyecto Maven
+:OrganizeImports         " Organizar imports con wildcards (Java)
+:CollapseImports [N]     " Colapsar a wildcards (umbral: N, default 3)
+:SortImports             " Ordenar imports alfabéticamente (sin colapsar)
+:ToggleWildcardWarnings  " Activar/desactivar filtro de warnings de wildcards
 ```
 
 ---
