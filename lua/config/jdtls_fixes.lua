@@ -38,11 +38,18 @@ end
 -- This avoids the Copilot issue by providing the correct command
 vim.api.nvim_create_user_command("OrganizeImports", function()
   if vim.bo.filetype == "java" then
-    local ok, jdtls = pcall(require, 'jdtls')
-    if ok and type(jdtls.organize_imports) == "function" then
-      jdtls.organize_imports()
+    -- Use custom function that collapses to wildcards when 3+ imports from same package
+    local ok, java_imports = pcall(require, 'utils.java_imports')
+    if ok and type(java_imports.organize_imports_with_wildcards) == "function" then
+      java_imports.organize_imports_with_wildcards(3)
     else
-      vim.notify("JDTLS not available", vim.log.levels.WARN)
+      -- Fallback to standard JDTLS organize imports
+      local jdtls_ok, jdtls = pcall(require, 'jdtls')
+      if jdtls_ok and type(jdtls.organize_imports) == "function" then
+        jdtls.organize_imports()
+      else
+        vim.notify("JDTLS not available", vim.log.levels.WARN)
+      end
     end
   else
     -- For other languages, use LSP code action
@@ -51,6 +58,25 @@ vim.api.nvim_create_user_command("OrganizeImports", function()
       apply = true,
     })
   end
-end, { desc = "Organize imports (all languages)" })
+end, { desc = "Organize imports with wildcards (Java 3+)" })
+
+-- Direct wildcard collapse command (for testing/manual use)
+vim.api.nvim_create_user_command("CollapseImports", function(opts)
+  if vim.bo.filetype ~= "java" then
+    vim.notify("CollapseImports only works with Java files", vim.log.levels.WARN)
+    return
+  end
+
+  local threshold = tonumber(opts.args) or 3
+  local ok, java_imports = pcall(require, 'utils.java_imports')
+  if ok and type(java_imports.collapse_imports_to_wildcard) == "function" then
+    java_imports.collapse_imports_to_wildcard(threshold)
+  else
+    vim.notify("java_imports utility not available", vim.log.levels.ERROR)
+  end
+end, {
+  nargs = '?',
+  desc = "Collapse imports to wildcards (threshold: default 3)"
+})
 
 return {}

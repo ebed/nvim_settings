@@ -393,6 +393,14 @@ public class Main {
                                     "org"
                                 },
                             },
+                            -- Configuración de organización de imports con wildcards
+                            -- Esta es la configuración clave para colapsar imports
+                            sources = {
+                                organizeImports = {
+                                    starThreshold = 3,      -- Usar * cuando hay 3+ imports del mismo paquete
+                                    staticStarThreshold = 3, -- Mismo para static imports
+                                },
+                            },
                             -- Opciones de code lens
                             implementationsCodeLens = { enabled = true },
                             referencesCodeLens = { enabled = true },
@@ -439,7 +447,15 @@ public class Main {
 
                 -- Keybindings Java-específicos
                 if type(jdtls.organize_imports) == "function" then
-                    nnoremap("<leader>jo", jdtls.organize_imports, bufopts, "Organizar imports")
+                    -- Use custom function to collapse imports to wildcards (3+ threshold)
+                    nnoremap("<leader>jo", function()
+                        local ok, java_imports = pcall(require, 'utils.java_imports')
+                        if ok and type(java_imports.organize_imports_with_wildcards) == "function" then
+                            java_imports.organize_imports_with_wildcards(3)
+                        else
+                            jdtls.organize_imports()
+                        end
+                    end, bufopts, "Organizar imports con wildcards")
                 end
 
                 if type(jdtls.extract_variable) == "function" then

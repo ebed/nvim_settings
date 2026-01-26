@@ -100,17 +100,19 @@
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<A-o>` | Organize imports | Organizar imports |
-| `crv` | Extract variable | Extraer variable (normal/visual) |
-| `crc` | Extract constant | Extraer constante (normal/visual) |
-| `crm` | Extract method | Extraer método (visual) |
+| `<leader>jo` | Organize imports + wildcards | Organiza imports y colapsa a wildcard (3+) |
+| `<leader>jv` | Extract variable | Extraer variable |
+| `<leader>jc` | Extract constant | Extraer constante |
+| `<leader>jm` | Extract method | Extraer método |
+
+**Nota sobre imports**: Cuando hay 3 o más clases del mismo paquete, se colapsan automáticamente a wildcard (`import pkg.*;`). Ver `JAVA_IMPORTS_GUIDE.md` para detalles.
 
 ### Testing
 
 | Keymap | Acción |
 |--------|--------|
-| `<leader>df` | Test class |
-| `<leader>dn` | Test nearest method |
+| `<leader>jt` | Test nearest method | Test del método más cercano |
+| `<leader>jT` | Test class | Test de toda la clase |
 
 ### Comandos
 
@@ -119,7 +121,8 @@
 :JavaClean             " Limpiar workspace
 :JavaRestart           " Reiniciar JDTLS
 :JavaNewProject <name> " Crear proyecto Maven
-:JavaOrganizeImports   " Organizar imports
+:OrganizeImports       " Organizar imports con wildcards (Java)
+:CollapseImports [N]   " Colapsar a wildcards (umbral: N, default 3)
 ```
 
 ---
