@@ -33,10 +33,28 @@ widgets = {
     -- replace_netrw = true
     -- },
     indent = { enabled = true },
-    input = { enabled = true },
+    input = {
+      enabled = true,
+      -- Mejora la visualización de input/prompts
+      border = "rounded",
+    },
     notifier = {
       enabled = true,
       timeout = 3000,
+      width = { min = 40, max = 0.4 },
+      height = { min = 1, max = 0.6 },
+      margin = { top = 0, right = 1, bottom = 0 },
+      padding = true,
+      sort = { "level", "added" },
+      level = vim.log.levels.TRACE,
+      icons = {
+        error = " ",
+        warn = " ",
+        info = " ",
+        debug = " ",
+        trace = " ",
+      },
+      style = "compact",
     },
     picker = { enabled = true,
     sources = {
@@ -51,18 +69,78 @@ widgets = {
     scroll = { enabled = true },
     statuscolumn = { enabled = true },
     words = { enabled = true },
+    terminal = {
+      enabled = true,
+      win = {
+        position = "float",
+        border = "rounded",
+        width = 0.8,
+        height = 0.8,
+      },
+    },
+    scratch = {
+      enabled = true,
+      win = {
+        border = "rounded",
+        width = 0.8,
+        height = 0.8,
+      },
+    },
+    zen = {
+      enabled = true,
+      toggles = {
+        dim = true,
+        git_signs = false,
+        mini_diff_signs = false,
+      },
+      zoom = {
+        toggles = {},
+      },
+    },
     styles = {
       blame_line = {
-  width = 0.6,
-  height = 0.6,
-  border = "rounded",
-  title = " Git Blame ",
-  title_pos = "center",
-  ft = "git",
-},
+        width = 0.6,
+        height = 0.6,
+        border = "rounded",
+        title = " Git Blame ",
+        title_pos = "center",
+        ft = "git",
+      },
       notification = {
-        -- wo = { wrap = true } -- Wrap notifications
-      }
+        wo = { wrap = true },
+        border = "rounded",
+      },
+      notification_history = {
+        border = "rounded",
+        zindex = 100,
+      },
+      input = {
+        border = "rounded",
+        title_pos = "center",
+        relative = "editor",
+        row = "50%",
+        col = "50%",
+      },
+      scratch = {
+        border = "rounded",
+        title = " Scratch Buffer ",
+        title_pos = "center",
+        ft = "markdown",
+      },
+      terminal = {
+        border = "rounded",
+        title = " Terminal ",
+        title_pos = "center",
+      },
+      zen = {
+        backdrop = {
+          transparent = false,
+          blend = 80,
+        },
+        win = {
+          width = 0.8,
+        },
+      },
     }
   },
   keys = {
@@ -184,5 +262,46 @@ widgets = {
         Snacks.toggle.dim():map("<leader>uD")
       end,
     })
+
+    -- LSP Progress Integration
+    -- Show LSP progress as notifications
+    vim.api.nvim_create_autocmd("LspProgress", {
+      callback = function(ev)
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        local value = ev.data.params.value
+        if not client or type(value) ~= "table" then
+          return
+        end
+
+        local title = client.name
+        if value.title then
+          title = title .. " - " .. value.title
+        end
+
+        -- Only show notifications for significant progress
+        if value.kind == "end" or value.percentage and value.percentage >= 90 then
+          Snacks.notifier.notify(value.message or "Complete", {
+            id = "lsp_progress_" .. client.id,
+            title = title,
+            level = "info",
+            timeout = 1000,
+          })
+        elseif value.kind == "begin" then
+          Snacks.notifier.notify(value.message or "Starting...", {
+            id = "lsp_progress_" .. client.id,
+            title = title,
+            level = "info",
+            timeout = false, -- Keep until completion
+          })
+        end
+      end,
+    })
+
+    -- Override vim.notify to use Snacks
+    vim.notify = function(msg, level, opts)
+      Snacks.notifier.notify(msg, vim.tbl_extend("force", {
+        level = level or vim.log.levels.INFO,
+      }, opts or {}))
+    end
   end,
 }
