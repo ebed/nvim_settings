@@ -462,13 +462,14 @@ public class Main {
                     nnoremap("<leader>jT", jdtls.test_class, bufopts, "Test clase")
                 end
 
-                -- Formato automático al guardar
-                vim.api.nvim_create_autocmd("BufWritePre", {
-                    buffer = bufnr,
-                    callback = function()
-                        vim.lsp.buf.format({ bufnr = bufnr })
-                    end,
-                })
+                -- Formato automático al guardar (DESACTIVADO)
+                -- Para formatear manualmente usa: <leader>f o :lua vim.lsp.buf.format()
+                -- vim.api.nvim_create_autocmd("BufWritePre", {
+                --     buffer = bufnr,
+                --     callback = function()
+                --         vim.lsp.buf.format({ bufnr = bufnr })
+                --     end,
+                -- })
 
                 -- Configurar DAP si está disponible
                 local has_dap, dap = pcall(require, 'dap')

@@ -330,15 +330,20 @@ return {
       -- Ejecuta la acción sin bloquear
       vim.lsp.buf.execute_command(params)
     end
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.java",
-      callback = function()
-        -- 1) Organiza imports (equivalente a importOrder + removeUnusedImports)
-        organize_imports()
-        -- -- 2) Formatea con conform (google-java-format + trims)
-        -- require("conform").format({ bufnr = 0 })
-      end,
-    })
+
+    -- Auto-format y organize imports desactivado para Java
+    -- Para formatear/organizar manualmente usa:
+    --   <leader>f  → Formatear
+    --   :OrganizeImports  → Organizar imports
+    -- vim.api.nvim_create_autocmd("BufWritePre", {
+    --   pattern = "*.java",
+    --   callback = function()
+    --     -- 1) Organiza imports (equivalente a importOrder + removeUnusedImports)
+    --     organize_imports()
+    --     -- 2) Formatea con conform (google-java-format + trims)
+    --     -- require("conform").format({ bufnr = 0 })
+    --   end,
+    -- })
   end,
 }
 
