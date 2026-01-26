@@ -14,6 +14,8 @@ require("config.mappings")
 -- require('config.kafka.kafka')
 -- require("jdtls_config_simple")
 require("config.lspconfig")
+-- JDTLS fixes: suppress noisy messages and Copilot errors
+require("config.jdtls_fixes")
 -- Sistema de mantenimiento de caché para evitar errores ENOSPC
 require("utils.cache_maintenance").setup()
 

@@ -264,13 +264,25 @@ widgets = {
     })
 
     -- LSP Progress Integration
-    -- Show LSP progress as notifications
+    -- Show LSP progress as notifications (filtered for noisy servers)
     vim.api.nvim_create_autocmd("LspProgress", {
       callback = function(ev)
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
         local value = ev.data.params.value
         if not client or type(value) ~= "table" then
           return
+        end
+
+        -- Filter out JDTLS noisy progress messages
+        if client.name == "jdtls" then
+          -- Only show JDTLS completion messages, not building/validating
+          if value.message and (
+            value.message:match("^Building") or
+            value.message:match("^Validate") or
+            value.message:match("^Publish Diagnostics")
+          ) then
+            return -- Suppress noisy JDTLS messages
+          end
         end
 
         local title = client.name
@@ -287,12 +299,15 @@ widgets = {
             timeout = 1000,
           })
         elseif value.kind == "begin" then
-          Snacks.notifier.notify(value.message or "Starting...", {
-            id = "lsp_progress_" .. client.id,
-            title = title,
-            level = "info",
-            timeout = false, -- Keep until completion
-          })
+          -- Don't show "begin" for JDTLS at all
+          if client.name ~= "jdtls" then
+            Snacks.notifier.notify(value.message or "Starting...", {
+              id = "lsp_progress_" .. client.id,
+              title = title,
+              level = "info",
+              timeout = false, -- Keep until completion
+            })
+          end
         end
       end,
     })

@@ -408,28 +408,22 @@ public class Main {
                     }
                 }
 
-                -- Añadir handlers para comandos específicos que otras herramientas como Copilot puedan usar
+                -- Handler para suprimir notificaciones excesivas de JDTLS
                 config.handlers = {
-                    ["workspace/executeCommand"] = function(_, params, callback)
-                        -- Manejar el comando java.edit.organizeImports que usa Copilot
-                        if params.command == "java.edit.organizeImports" then
-                            require('jdtls').organize_imports()
-                            if callback then
-                                callback(nil, {})
+                    -- Filtrar mensajes de progreso repetitivos
+                    ["$/progress"] = function(_, result, ctx)
+                        -- Suprimir mensajes de building/validating repetitivos
+                        if result.value and result.value.message then
+                            local msg = result.value.message
+                            if msg:match("^Building") or
+                               msg:match("^Validate documents") or
+                               msg:match("^Publish Diagnostics") then
+                                return -- Suprimir estos mensajes
                             end
-                            return true
                         end
-                        -- También mapear el comando oficial a nuestra implementación
-                        if params.command == "java.action.organizeImports" then
-                            require('jdtls').organize_imports()
-                            if callback then
-                                callback(nil, {})
-                            end
-                            return true
-                        end
-                        -- Permitir que otros comandos sigan el flujo normal
-                        return false
-                    end
+                        -- Permitir otros mensajes de progreso
+                        vim.lsp.handlers["$/progress"](_, result, ctx)
+                    end,
                 }
 
                 -- Iniciar servidor
