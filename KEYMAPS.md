@@ -1,0 +1,260 @@
+# Keymaps Quick Reference
+
+## 🗺️ Guía Rápida de Atajos de Teclado
+
+**Leader key:** `<Space>`
+
+---
+
+## 📁 General & Navigation
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>w` | Save | Guardar archivo actual |
+| `<leader>q` | Quit | Cerrar ventana actual |
+| `<leader>Q` | Force Quit | Cerrar todo (forzado) |
+| `<leader>h` | Clear highlight | Limpiar resaltado de búsqueda |
+| `<Tab>` | Next buffer | Siguiente buffer |
+| `<S-Tab>` | Previous buffer | Buffer anterior |
+| `<leader>bd` | Delete buffer | Cerrar buffer actual |
+| `<C-A>` | Go to line start | Inicio de línea (todos los modos) |
+| `<C-E>` | Go to line end | Fin de línea (todos los modos) |
+
+### Ventanas (Splits)
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>sv` | Split vertical |
+| `<leader>sh` | Split horizontal |
+| `<leader>se` | Equalizar splits |
+| `<leader>sx` | Cerrar split |
+
+---
+
+## 🔍 Telescope (Búsqueda)
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>ff` | Find files | Buscar archivos |
+| `<leader>fg` | Live grep | Buscar en contenido |
+| `<leader>fb` | Find buffers | Buscar en buffers abiertos |
+| `<leader>fh` | Help tags | Buscar en ayuda |
+| `<leader>fr` | Recent files | Archivos recientes |
+| `<leader>fw` | Search word | Buscar palabra bajo cursor |
+
+---
+
+## 🌿 Git Operations
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>gg` | LazyGit | Abrir LazyGit TUI |
+| `<leader>gb` | Git branches | Ver branches |
+| `<leader>gc` | Git commits | Ver commits |
+| `<leader>gs` | Git status | Ver status |
+
+---
+
+## 💡 LSP (Language Server)
+
+### Navigation
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `gd` | Go to definition | Ir a definición |
+| `gD` | Go to declaration | Ir a declaración |
+| `gi` | Go to implementation | Ir a implementación |
+| `gr` | Go to references | Ver referencias |
+| `K` | Hover | Ver documentación (hover.nvim) |
+
+### Actions
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>rn` | Rename | Renombrar símbolo |
+| `<leader>ca` | Code action | Acciones de código |
+| `<leader>f` | Format | Formatear buffer |
+| `<leader>dl` | Diagnostics list | Lista de diagnósticos |
+| `!` | Open diagnostic float | Ver diagnóstico flotante |
+| `[d` | Previous diagnostic | Diagnóstico anterior |
+| `]d` | Next diagnostic | Siguiente diagnóstico |
+
+---
+
+## 🐛 Debugging (DAP)
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<F5>` | Continue | Continuar/Iniciar debug |
+| `<F10>` | Step over | Paso siguiente (sobre) |
+| `<F11>` | Step into | Paso siguiente (dentro) |
+| `<F12>` | Step out | Salir de función |
+| `<leader>db` | Toggle breakpoint | Breakpoint on/off |
+| `<leader>dr` | REPL toggle | Abrir/cerrar REPL |
+
+---
+
+## ☕ Java (JDTLS)
+
+### Refactoring
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<A-o>` | Organize imports | Organizar imports |
+| `crv` | Extract variable | Extraer variable (normal/visual) |
+| `crc` | Extract constant | Extraer constante (normal/visual) |
+| `crm` | Extract method | Extraer método (visual) |
+
+### Testing
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>df` | Test class |
+| `<leader>dn` | Test nearest method |
+
+### Comandos
+
+```vim
+:JavaInfo              " Ver configuración Java/JDTLS
+:JavaClean             " Limpiar workspace
+:JavaRestart           " Reiniciar JDTLS
+:JavaNewProject <name> " Crear proyecto Maven
+:JavaOrganizeImports   " Organizar imports
+```
+
+---
+
+## 🧪 Testing (Neotest)
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>Te` | Run test | Ejecutar test bajo cursor |
+| `<leader>Ta` | Run test suite | Ejecutar suite completa |
+| `<leader>Tc` | Run current file | Ejecutar tests del archivo |
+| `<leader>Ts` | Test summary | Ver resumen de tests |
+
+---
+
+## 🤖 AI Assistance (Copilot)
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>cc` | CopilotChat toggle | Abrir/cerrar chat |
+| `<leader>cp` | CopilotChat prompt | Seleccionar prompt |
+| `<leader>cd` | CopilotChat doc | Generar documentación |
+
+---
+
+## 🎨 Plugins Varios
+
+### Snacks.nvim
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>sd` | Snacks Dashboard |
+| `<leader>sp` | Snacks Picker |
+| `<leader>sn` | Snacks Notify |
+| `<leader>se` | Snacks Explorer |
+
+### File Explorer
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>e` | Toggle Neo-tree |
+
+### Terminal
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>tt` | Toggle terminal |
+
+### Bookmarks
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>MB` | List all bookmarks |
+| `<leader>MB0-6` | List bookmark group N |
+
+### Markdown
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>mp` | Markdown preview toggle |
+
+### Build Tools
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>mb` | Maven build |
+| `<leader>mr` | Maven run |
+| `<leader>et` | Elixir mix toggle |
+
+### HTTP/REST Client
+
+En archivos `.http`:
+
+| Keymap | Acción |
+|--------|--------|
+| `<leader>r` | Ejecutar request |
+
+---
+
+## 🎯 Leap (Motion)
+
+| Keymap | Acción |
+|--------|--------|
+| `R` (visual/operator) | Treesitter select |
+
+---
+
+## 💡 Tips
+
+### Descubrir Keymaps
+
+```vim
+:Telescope keymaps
+```
+
+### Ver Keymaps de Buffer Actual
+
+```vim
+:verbose map <leader>
+```
+
+### WhichKey
+
+Al presionar `<leader>` y esperar, aparece menú con opciones disponibles.
+
+---
+
+## 📝 Convenciones
+
+- **`<leader>`** = Espacio
+- **`g` prefix** = "Go to" navigation
+- **`<leader>f`** = "Find" (Telescope)
+- **`<leader>g`** = "Git"
+- **`<leader>c`** = "Copilot/Code"
+- **`<leader>d`** = "Debug/Diagnostics"
+- **`<leader>T`** = "Test"
+- **`<leader>s`** = "Snacks"
+- **`<leader>M`** = "Marks/Bookmarks"
+- **`<leader>m`** = "Maven/Build"
+- **`<leader>e`** = "Explorer/Elixir"
+
+---
+
+## 🔧 Personalización
+
+Para agregar/modificar keymaps, editar:
+
+```
+~/.config/nvim/lua/config/mappings/
+├── general.lua    # Navegación básica
+├── telescope.lua  # Búsqueda
+├── git.lua        # Git
+├── lsp.lua        # LSP
+├── dap.lua        # Debugging
+├── plugins.lua    # Plugins varios
+├── java.lua       # Java específico
+└── testing.lua    # Testing
+```

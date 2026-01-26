@@ -51,7 +51,9 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(xargs:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Phase 1 cleanup - consolidate JDTLS, configure Neorg, standardize names\n\nJDTLS Consolidation:\n- Consolidate 11+ duplicate JDTLS configs into single jdtls.lua\n- Archive jdtls-auto-import, jdtls-final-solution, jdtls-backup/ directory\n- Archive .bak files: jdtls.lua.bak, jdtls-simple.lua.bak, jdtls-ultra-minimal.lua.bak\n- Remove obsolete scripts: java_env.sh, jdtls_diagnostico.sh\n\nNeorg Configuration:\n- Configure Neorg with proper setup and workspaces \\(~/notes, ~/work-notes\\)\n- Remove neorg-disable.lua\n- Enable core modules: defaults, concealer, dirman, completion, keybinds\n\nCode Cleanup:\n- Archive 7 completely commented plugin files \\(catpuccin, claudecode, codecompanion, colorschemes, coolchunk, elixir-tools\\)\n- Clean copilot.lua: remove commented configuration blocks\n\nStandardization:\n- Fix typos: loghighligth → loghighlight, tiny-diagnostigs → tiny-diagnostics\n- Rename for clarity: manyplugins → core-plugins, elixir-enhanced → elixir\n- Rename jdtls-unified → jdtls \\(standard name\\)\n\nAll removed files archived to archive/ directory for recovery if needed.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
