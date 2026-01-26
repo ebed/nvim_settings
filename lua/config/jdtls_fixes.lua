@@ -79,4 +79,21 @@ end, {
   desc = "Collapse imports to wildcards (threshold: default 3)"
 })
 
+-- Sort imports alphabetically (no collapse, no JDTLS)
+vim.api.nvim_create_user_command("SortImports", function()
+  if vim.bo.filetype ~= "java" then
+    vim.notify("SortImports only works with Java files", vim.log.levels.WARN)
+    return
+  end
+
+  local ok, java_imports = pcall(require, 'utils.java_imports')
+  if ok and type(java_imports.sort_imports_only) == "function" then
+    java_imports.sort_imports_only()
+  else
+    vim.notify("java_imports utility not available", vim.log.levels.ERROR)
+  end
+end, {
+  desc = "Sort imports alphabetically (no collapse)"
+})
+
 return {}

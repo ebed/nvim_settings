@@ -93,4 +93,39 @@ function M.organize_imports_with_wildcards(threshold)
   end
 end
 
+-- Sort imports alphabetically without collapsing
+function M.sort_imports_only()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+  local imports = {}
+  local import_section_start = nil
+  local import_section_end = nil
+
+  -- Collect all import lines
+  for i, line in ipairs(lines) do
+    -- Match both regular and static imports
+    if line:match("^import%s+") then
+      if not import_section_start then
+        import_section_start = i
+      end
+      import_section_end = i
+      table.insert(imports, line)
+    end
+  end
+
+  -- If no imports found, nothing to do
+  if #imports == 0 then
+    vim.notify("No imports found", vim.log.levels.INFO)
+    return
+  end
+
+  -- Sort imports alphabetically
+  table.sort(imports)
+
+  -- Replace import section
+  vim.api.nvim_buf_set_lines(bufnr, import_section_start - 1, import_section_end, false, imports)
+  vim.notify(string.format("Sorted %d imports alphabetically", #imports), vim.log.levels.INFO)
+end
+
 return M

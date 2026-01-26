@@ -55,6 +55,23 @@ Default threshold: **3 imports** from the same package triggers wildcard collaps
 
 **Use case**: When you want to collapse imports without running full organize imports.
 
+### `:SortImports`
+**Description**: Sort imports alphabetically without collapsing or organizing
+
+**No arguments**
+
+**Example**:
+```vim
+:SortImports          " Pure alphabetical sort
+```
+
+**Use case**: When you only want to sort imports alphabetically without:
+- Removing unused imports
+- Collapsing to wildcards
+- Using JDTLS organize
+
+**Perfect for**: Quick sorting without any other modifications.
+
 ## Keymaps
 
 ### `<leader>jo`
@@ -164,6 +181,34 @@ import com.example.foo.*;
 - `java.util.*`: 5 imports → collapsed
 - `com.example.foo.*`: 3 imports → collapsed
 - `com.example.bar.*`: Only 2 imports → NOT collapsed
+
+### Example 4: Only Sort (No Collapse)
+
+**Input file** (unsorted):
+```java
+import java.util.List;
+import com.example.foo.Clase1;
+import java.util.ArrayList;
+import com.example.bar.Service1;
+import java.util.Map;
+```
+
+**Run**: `:SortImports`
+
+**Result**:
+```java
+import com.example.bar.Service1;
+import com.example.foo.Clase1;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+```
+
+**Explanation**:
+- Pure alphabetical sort
+- No wildcards
+- No removal of unused imports
+- No JDTLS processing
 
 ## Limitations
 

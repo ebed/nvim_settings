@@ -123,6 +123,7 @@
 :JavaNewProject <name> " Crear proyecto Maven
 :OrganizeImports       " Organizar imports con wildcards (Java)
 :CollapseImports [N]   " Colapsar a wildcards (umbral: N, default 3)
+:SortImports           " Ordenar imports alfabéticamente (sin colapsar)
 ```
 
 ---
