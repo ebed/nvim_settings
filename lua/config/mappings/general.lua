@@ -24,14 +24,14 @@ vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split horizontal" })
 vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Equalize splits" })
 vim.keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close split" })
 
--- File explorer
-vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>", { desc = "Toggle Neo-tree" })
+-- File explorer - REMOVED (defined in snacks.lua keys)
+-- Use: <leader>e to toggle Snacks Explorer
 
--- Terminal toggle
-vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
+-- Terminal toggle - REMOVED (defined in snacks.lua keys)
+-- Use: <c-/> to toggle Snacks Terminal
 
--- Zen mode
-vim.keymap.set("n", "<leader>z", "<cmd>ZenMode<CR>", { desc = "Toggle Zen Mode" })
+-- Zen mode - REMOVED (defined in snacks.lua keys)
+-- Use: <leader>z to toggle Zen Mode
 
 -- Diagnostics
 vim.keymap.set("n", "!", "<cmd>lua vim.diagnostic.open_float()<CR>", { noremap = true, silent = true })
