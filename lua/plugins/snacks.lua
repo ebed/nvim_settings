@@ -1,16 +1,17 @@
 return {
   "folke/snacks.nvim",
+  enabled = true, -- Re-enabled with minimal config to find problematic module
   priority = 1000,
   lazy = false,
   ---@type snacks.Config
   opts = {
-      
+
 widgets = {
-      enabled = true
+      enabled = true  -- ✅ GRUPO 4: Enabled
 },
-    bigfile = { enabled = true },
-    dashboard = { 
-      enabled = true,
+    bigfile = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    dashboard = {
+      enabled = true,  -- ✅ GRUPO 4: Enabled
   formats = {
     key = function(item)
       return { { "[", hl = "special" }, { item.key, hl = "key" }, { "]", hl = "special" } }
@@ -32,14 +33,14 @@ widgets = {
     --   enabled = true,
     -- replace_netrw = true
     -- },
-    indent = { enabled = true },
+    indent = { enabled = false },  -- ❌ CULPRIT: Causes crash with lua files
     input = {
-      enabled = true,
+      enabled = true,  -- ✅ GRUPO 3: Enabled
       -- Mejora la visualización de input/prompts
       border = "rounded",
     },
     notifier = {
-      enabled = true,
+      enabled = true,  -- ✅ GRUPO 3: Enabled
       timeout = 3000,
       width = { min = 40, max = 0.4 },
       height = { min = 1, max = 0.6 },
@@ -56,7 +57,7 @@ widgets = {
       },
       style = "compact",
     },
-    picker = { enabled = true,
+    picker = { enabled = true,  -- ✅ GRUPO 3: Enabled
     sources = {
         explorer = {
           -- your explorer picker configuration comes here
@@ -64,13 +65,13 @@ widgets = {
         }
       }
     },
-    quickfile = { enabled = true },
-    scope = { enabled = true },
-    scroll = { enabled = true },
-    statuscolumn = { enabled = true },
-    words = { enabled = true },
+    quickfile = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    scope = { enabled = true },  -- 🧪 TESTING: scope + statuscolumn
+    scroll = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    statuscolumn = { enabled = true },  -- 🧪 TESTING: scope + statuscolumn
+    words = { enabled = true },  -- ✅ GRUPO 1: Enabled
     terminal = {
-      enabled = true,
+      enabled = true,  -- ✅ GRUPO 4: Enabled
       win = {
         position = "float",
         border = "rounded",
@@ -79,7 +80,7 @@ widgets = {
       },
     },
     scratch = {
-      enabled = true,
+      enabled = true,  -- ✅ GRUPO 4: Enabled
       win = {
         border = "rounded",
         width = 0.8,
@@ -87,7 +88,7 @@ widgets = {
       },
     },
     zen = {
-      enabled = true,
+      enabled = true,  -- ✅ GRUPO 4: Enabled
       toggles = {
         dim = true,
         git_signs = false,
@@ -236,6 +237,7 @@ widgets = {
     }
   },
   init = function()
+    -- ✅ GRUPO 5: Full init restored
     vim.api.nvim_create_autocmd("User", {
       pattern = "VeryLazy",
       callback = function()
@@ -258,7 +260,7 @@ widgets = {
         Snacks.toggle.treesitter():map("<leader>uT")
         Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
         Snacks.toggle.inlay_hints():map("<leader>uh")
-        Snacks.toggle.indent():map("<leader>ug")
+        -- Snacks.toggle.indent():map("<leader>ug")  -- ❌ Disabled: indent causes crashes
         Snacks.toggle.dim():map("<leader>uD")
       end,
     })
