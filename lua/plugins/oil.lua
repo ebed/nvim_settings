@@ -13,6 +13,8 @@ return {
 			["<C-t>"] = "actions.select_tab",
 			["<C-p>"] = "actions.preview",
 			["<C-c>"] = "actions.close",
+			["q"] = "actions.close",  -- Added: q to close oil (easier)
+			["<Esc>"] = "actions.close",  -- Added: Esc to close oil in normal mode
 			["<C-r>"] = "actions.refresh",
 			["-"] = "actions.parent",
 			["_"] = "actions.open_cwd",
@@ -48,5 +50,22 @@ return {
 	lazy = false,
 	keys = {
 		{ "-", "<cmd>Oil<cr>", desc = "Open parent directory (Oil)" },
+		{ "<leader>-", function()
+			-- Open Oil in current working directory (useful from explorer)
+			require("oil").open(vim.fn.getcwd())
+		end, desc = "Open Oil in cwd" },
 	},
+	config = function(_, opts)
+		require("oil").setup(opts)
+
+		-- Create command to open Oil in current working directory
+		vim.api.nvim_create_user_command("OilHere", function()
+			require("oil").open(vim.fn.getcwd())
+		end, { desc = "Open Oil in current working directory" })
+
+		-- Create command to open Oil in specific path
+		vim.api.nvim_create_user_command("OilOpen", function(args)
+			require("oil").open(args.args)
+		end, { nargs = 1, complete = "dir", desc = "Open Oil in specific directory" })
+	end,
 }

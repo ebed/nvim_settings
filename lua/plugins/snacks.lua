@@ -155,6 +155,12 @@ widgets = {
     { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
     { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
     { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer (Snacks)" },
+    { "<leader>E", function()
+      -- Open Oil in current file's directory
+      local current_file = vim.api.nvim_buf_get_name(0)
+      local current_dir = vim.fn.fnamemodify(current_file, ":h")
+      require("oil").open(current_dir)
+    end, desc = "Open Oil in current directory" },
     -- find
     { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
     { "<leader>fc", function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },
