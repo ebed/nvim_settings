@@ -1,8 +1,13 @@
 -- Neorg: Organization and note-taking with advanced markup
 -- Workspaces: Development notes, daily journal, projects, personal
+--
+-- IMPORTANT: Neorg is currently DISABLED until parser is manually installed
+-- To enable: Follow instructions in NEORG_SETUP.md
 return {
   "nvim-neorg/neorg",
-  lazy = false,
+  enabled = false,  -- Disabled until parser installation
+  lazy = true,
+  cmd = "Neorg",
   version = "*",
   dependencies = {
     "nvim-neorg/lua-utils.nvim",

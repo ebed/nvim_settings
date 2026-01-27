@@ -1,50 +1,90 @@
 # Neorg Setup Instructions
 
-## ⚠️ Estado Actual
+## ⚠️ ESTADO ACTUAL: DESHABILITADO
 
-Neorg está configurado pero con algunos módulos **deshabilitados temporalmente** hasta que los parsers se instalen.
+**Neorg está completamente DESHABILITADO** para evitar errores de parser.
 
-**Módulos deshabilitados**:
-- `core.concealer` (iconos y markup visual)
-- `core.completion` (autocompletado)
+Para usar Neorg, debes seguir los pasos de instalación manual abajo.
 
-**Módulos habilitados** (funcionan sin parser):
-- `core.dirman` (workspaces)
-- `core.journal` (bitácora)
-- `core.keybinds`
-- Todos los demás módulos básicos
+**¿Por qué está deshabilitado?**
+Neorg requiere un parser tree-sitter especial que debe instalarse manualmente.
+Sin el parser, Neorg genera múltiples errores al iniciar Neovim.
 
-## 🚀 Instalación del Parser (Primer Uso)
+**Ubicación de configuración**: `lua/plugins/neorg.lua`
 
-### Método 1: Comando Neorg (Recomendado)
+## 🚀 Pasos de Instalación Manual
+
+### Paso 1: Habilitar Neorg
+
+Edita `lua/plugins/neorg.lua` y cambia `enabled = false` a `enabled = true`:
+
+**Cambiar línea 8 de**:
+```lua
+  enabled = false,  -- Disabled until parser installation
+```
+
+**A**:
+```lua
+  enabled = true,  -- Enable Neorg
+```
+
+**También cambia** `lazy = true` **a** `lazy = false`:
+
+```lua
+  lazy = false,  -- Load on startup
+```
+
+Guarda el archivo.
+
+### Paso 2: Reiniciar Neovim
+
+```vim
+:qa
+nvim
+```
+
+### Paso 3: Instalar Parser de Neorg
+
+Dentro de Neovim, ejecuta:
 
 ```vim
 :Neorg sync-parsers
 ```
 
-Espera a que termine la instalación (puede tardar 1-2 minutos).
+**Espera 1-2 minutos** mientras se compila e instala el parser.
 
-### Método 2: Instalación Automática
-
-Simplemente abre un archivo `.norg`:
-
-```vim
-:e ~/neorg/journal/index.norg
+Verás mensajes como:
+```
+[neorg] Installing tree-sitter parser for norg...
+[neorg] Compiling parser...
+[neorg] Parser installed successfully
 ```
 
-Neorg detectará que falta el parser e intentará instalarlo automáticamente.
+**Si ves errores**:
+```bash
+# En terminal (fuera de Neovim)
+xcode-select --install  # Instalar herramientas de compilación
+```
 
-### Verificar Instalación
+Luego intenta de nuevo `:Neorg sync-parsers`.
+
+### Paso 4: Verificar Instalación
 
 ```vim
 :checkhealth neorg
 ```
 
-Deberías ver ✅ junto a "Tree-sitter parser".
+Deberías ver:
+- ✅ Tree-sitter parser installed
+- ✅ All modules loaded
 
-## 🔧 Habilitar Módulos Completos
+Si ves errores, consulta la sección Troubleshooting abajo.
 
-Una vez que el parser esté instalado, edita `lua/plugins/neorg.lua`:
+## 🔧 Paso 5: Habilitar Módulos Visuales (Opcional)
+
+Una vez que el parser esté instalado (Paso 4 completado), puedes habilitar los módulos visuales.
+
+Edita `lua/plugins/neorg.lua`:
 
 **1. Habilitar concealer** (líneas ~18-24):
 
@@ -258,25 +298,26 @@ integrations = {
 ## Estado del Setup
 
 ```
-✅ Configuración de Neorg instalada
-✅ 4 workspaces configurados
+✅ Configuración de Neorg lista (en archivo)
+✅ 4 workspaces pre-configurados
 ✅ Templates de journal creados
-✅ Índices pre-creados
-✅ Keymaps configurados
-⏸️  Parser pendiente (instalar con :Neorg sync-parsers)
+✅ Índices pre-creados en ~/neorg/
+✅ Keymaps configurados (se activan al habilitar)
+❌ Neorg DESHABILITADO (enabled = false)
+❌ Parser NO instalado (pendiente manual)
 ⏸️  Concealer deshabilitado (habilitar después de parser)
 ⏸️  Completion deshabilitado (habilitar después de parser)
 ```
 
-## Próximo Paso
+## Próximos Pasos
 
-**Instala el parser ahora**:
+Sigue los "Pasos de Instalación Manual" arriba en orden:
 
-```vim
-:Neorg sync-parsers
-```
-
-Luego sigue las instrucciones de "Habilitar Módulos Completos" arriba.
+1. ✏️  Editar lua/plugins/neorg.lua (enabled = true)
+2. 🔄 Reiniciar Neovim
+3. 📦 :Neorg sync-parsers
+4. ✅ :checkhealth neorg
+5. 🎨 Descomentar concealer y completion (opcional)
 
 ---
 
