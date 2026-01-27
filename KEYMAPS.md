@@ -150,6 +150,72 @@
 
 ---
 
+## 📝 Neorg (Notas y Bitácora)
+
+**Leader de Neorg**: `<leader>n`
+
+### Workspaces
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>nw` | Select workspace | Selector de workspace |
+| `<leader>nd` | Workspace desarrollo | Notas técnicas y desarrollo |
+| `<leader>nj` | Workspace journal | Bitácora diaria |
+| `<leader>np` | Workspace proyectos | Documentación de proyectos |
+| `<leader>ni` | Workspace index | Abrir índice del workspace actual |
+| `<leader>nr` | Return | Volver al archivo anterior |
+
+### Journal / Bitácora Diaria
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>njt` | Today's journal | Crear/abrir entrada de HOY |
+| `<leader>njy` | Yesterday's journal | Abrir entrada de AYER |
+| `<leader>njm` | Tomorrow's journal | Crear entrada de MAÑANA |
+| `<leader>njc` | Custom date journal | Journal de fecha específica |
+
+### TODO Management
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>ntd` | TODO done | Marcar como completado ✓ |
+| `<leader>ntu` | TODO undone | Marcar como no completado ✗ |
+| `<leader>ntp` | TODO pending | Marcar como pendiente ○ |
+| `<leader>ntc` | TODO cancelled | Cancelar TODO ⊘ |
+| `<C-Space>` | Cycle TODO state | Ciclar entre estados |
+
+### Telescope Integration
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>nf` | Find norg files | Buscar archivos .norg |
+| `<leader>ns` | Search headings | Buscar en títulos |
+| `<leader>nl` | Find linkable | Buscar elementos linkables |
+
+### Otros
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>ne` | Export to file | Exportar a markdown |
+| `<leader>nk` (visual) | Create link | Crear link desde selección |
+| `<C-d>` (insert) | Insert date | Insertar fecha (2026-01-27) |
+| `<C-t>` (insert) | Insert time | Insertar hora (14:30) |
+
+### Comandos
+
+```vim
+:Neorg workspace           " Selector de workspace
+:Neorg workspace desarrollo " Abrir workspace específico
+:Neorg journal today       " Journal de hoy
+:Neorg index               " Abrir índice
+:Neorg export to-file      " Exportar a markdown
+:TSInstall norg            " Instalar parser de Neorg
+```
+
+**Ver guía completa**: `NEORG_GUIDE.md`
+
+---
+
 ## 🎨 Plugins Varios
 
 ### Snacks.nvim
