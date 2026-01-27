@@ -16,38 +16,22 @@ return {
       load = {
         -- Core modules
         ["core.defaults"] = {},
-        ["core.concealer"] = {
-          config = {
-            -- Icon presets: "basic", "diamond", "varied"
-            icon_preset = "varied",
-            folds = true,
-            icons = {
-              todo = {
-                done = { icon = "✓" },
-                pending = { icon = "○" },
-                undone = { icon = "✗" },
-                uncertain = { icon = "?" },
-                on_hold = { icon = "⏸" },
-                cancelled = { icon = "⊘" },
-                recurring = { icon = "⟲" },
-                urgent = { icon = "⚠" },
-              },
-              heading = {
-                icons = { "◉", "◎", "○", "✺", "▶", "⤷" },
-              },
-              list = {
-                icons = { "•", "◦", "▸", "▹" },
-              },
-            },
-          },
-        },
 
-        -- Completion
-        ["core.completion"] = {
-          config = {
-            engine = "nvim-cmp",
-          },
-        },
+        -- Concealer disabled temporarily until parsers are installed
+        -- Will auto-enable after Neorg installs its parsers
+        -- ["core.concealer"] = {
+        --   config = {
+        --     icon_preset = "varied",
+        --     folds = true,
+        --   },
+        -- },
+
+        -- Completion (disabled until parsers installed)
+        -- ["core.completion"] = {
+        --   config = {
+        --     engine = "nvim-cmp",
+        --   },
+        -- },
 
         -- Directories and workspaces
         ["core.dirman"] = {

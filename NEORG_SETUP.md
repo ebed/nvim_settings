@@ -1,211 +1,284 @@
-# Configuración de Neorg
+# Neorg Setup Instructions
 
-## Problema Identificado
+## ⚠️ Estado Actual
 
-Neorg requiere un parser de Treesitter específico para archivos `.norg` que debe instalarse manualmente.
+Neorg está configurado pero con algunos módulos **deshabilitados temporalmente** hasta que los parsers se instalen.
 
-## Solución Paso a Paso
+**Módulos deshabilitados**:
+- `core.concealer` (iconos y markup visual)
+- `core.completion` (autocompletado)
 
-### 1. Abrir Neovim
-```bash
-nvim
-```
+**Módulos habilitados** (funcionan sin parser):
+- `core.dirman` (workspaces)
+- `core.journal` (bitácora)
+- `core.keybinds`
+- Todos los demás módulos básicos
 
-### 2. Instalar el Parser de Neorg
+## 🚀 Instalación del Parser (Primer Uso)
 
-Ejecuta el siguiente comando dentro de Neovim:
+### Método 1: Comando Neorg (Recomendado)
+
 ```vim
 :Neorg sync-parsers
 ```
 
-Si ves errores, intenta:
+Espera a que termine la instalación (puede tardar 1-2 minutos).
+
+### Método 2: Instalación Automática
+
+Simplemente abre un archivo `.norg`:
+
 ```vim
-:Lazy reload neorg
-:Neorg sync-parsers
+:e ~/neorg/journal/index.norg
 ```
 
-### 3. Verificar Instalación
+Neorg detectará que falta el parser e intentará instalarlo automáticamente.
 
-Después de que termine la instalación del parser:
+### Verificar Instalación
+
 ```vim
 :checkhealth neorg
 ```
 
-### 4. Habilitar Core.Concealer (Opcional)
+Deberías ver ✅ junto a "Tree-sitter parser".
 
-Una vez que el parser esté instalado exitosamente, puedes habilitar el módulo `core.concealer` para tener iconos y formato bonito:
+## 🔧 Habilitar Módulos Completos
 
-Edita `/Users/ralbertomerinocolipe/.config/nvim/lua/plugins/neorg.lua` y descomenta estas líneas:
+Una vez que el parser esté instalado, edita `lua/plugins/neorg.lua`:
+
+**1. Habilitar concealer** (líneas ~18-24):
+
+Cambiar de:
+```lua
+-- ["core.concealer"] = {
+--   config = {
+--     icon_preset = "varied",
+--     folds = true,
+--   },
+-- },
+```
+
+A:
 ```lua
 ["core.concealer"] = {
   config = {
-    icon_preset = "basic",
+    icon_preset = "varied",
+    folds = true,
+    icons = {
+      todo = {
+        done = { icon = "✓" },
+        pending = { icon = "○" },
+        undone = { icon = "✗" },
+        uncertain = { icon = "?" },
+        on_hold = { icon = "⏸" },
+        cancelled = { icon = "⊘" },
+        recurring = { icon = "⟲" },
+        urgent = { icon = "⚠" },
+      },
+      heading = {
+        icons = { "◉", "◎", "○", "✺", "▶", "⤷" },
+      },
+      list = {
+        icons = { "•", "◦", "▸", "▹" },
+      },
+    },
   },
 },
 ```
 
-Luego reinicia Neovim:
+**2. Habilitar completion** (líneas ~27-31):
+
+Cambiar de:
+```lua
+-- ["core.completion"] = {
+--   config = {
+--     engine = "nvim-cmp",
+--   },
+-- },
+```
+
+A:
+```lua
+["core.completion"] = {
+  config = {
+    engine = "nvim-cmp",
+  },
+},
+```
+
+**3. Recargar configuración**:
+
 ```vim
-:Lazy reload neorg
+:Lazy sync
+:source ~/.config/nvim/init.lua
+```
+
+O simplemente reinicia Neovim:
+```vim
 :qa
 nvim
 ```
 
-## Uso de Neorg
+## ✅ Verificación Post-Setup
 
-### Comandos Básicos
-
-#### Workspaces
+Abre un archivo Neorg:
 ```vim
-:Neorg workspace notes      " Ir al workspace de notas
-:Neorg workspace work       " Ir al workspace de trabajo
-:Neorg index               " Abrir index.norg del workspace actual
+:e ~/neorg/journal/index.norg
 ```
 
-#### Crear Notas
+Deberías ver:
+- ✅ Syntax highlighting correcto
+- ✅ Iconos en TODOs (si concealer habilitado)
+- ✅ Headings con iconos personalizados
+- ✅ Sin errores en `:messages`
+
+## 🎯 Comandos Básicos
+
 ```vim
-:Neorg journal today       " Crear nota del día
-:Neorg journal yesterday   " Nota de ayer
-:Neorg journal tomorrow    " Nota de mañana
+:Neorg workspace           " Selector de workspace
+:Neorg workspace desarrollo " Abrir desarrollo
+:Neorg journal today       " Journal de hoy
+:Neorg index               " Abrir índice del workspace
 ```
 
-### Keybindings (Default)
-
-En archivos `.norg`:
-
-#### Navegación
-- `<CR>` en un enlace - Seguir enlace
-- `<M-CR>` - Crear enlace desde palabra bajo cursor
-- `<Tab>` - Siguiente heading
-- `<S-Tab>` - Heading anterior
-
-#### Listas y TODOs
-- `<C-Space>` - Toggle TODO estado
-- `<M-t>` - Crear TODO
-- `<M-l>` - Crear lista
-
-#### Formatting
-- `<M-i>` - Itálica
-- `<M-b>` - Negrita
-- `<M-c>` - Código inline
-
-## Estructura de Workspaces
+## 📁 Estructura de Directorios
 
 ```
-~/notes/
-├── index.norg          # Índice principal
-└── ...                 # Tus notas
-
-~/work-notes/
-├── index.norg          # Índice de trabajo
-└── ...                 # Notas de trabajo
+~/neorg/
+├── desarrollo/          ← Notas técnicas
+│   └── index.norg
+├── journal/            ← Bitácora diaria
+│   ├── template.norg   ← Template auto
+│   └── index.norg
+├── proyectos/          ← Proyectos
+│   └── index.norg
+└── personal/           ← Personal
+    └── index.norg
 ```
 
-## Sintaxis Básica de Norg
+## 🐛 Troubleshooting
 
-### Headings
-```norg
-* Heading 1
-** Heading 2
-*** Heading 3
+### Error: "Parser could not be created"
+
+**Causa**: Parser de Neorg no instalado.
+
+**Solución**:
+```vim
+:Neorg sync-parsers
 ```
 
-### Listas
-```norg
-- Item de lista
--- Sub-item
---- Sub-sub-item
+Si falla:
+```bash
+# En terminal, verifica herramientas de compilación
+xcode-select --install
+
+# Luego en Neovim:
+:Lazy clean neorg
+:Lazy install
+:Neorg sync-parsers
 ```
 
-### TODOs
-```norg
-- ( ) TODO sin hacer
-- (x) TODO completado
-- (!) TODO urgente
-- (?) TODO con pregunta
+### Error: "attempt to index a nil value"
+
+**Causa**: Directorios de workspace no existen.
+
+**Solución**:
+```bash
+mkdir -p ~/neorg/{desarrollo,journal,proyectos,personal}
 ```
 
-### Enlaces
-```norg
-{:archivo:}              # Enlace a archivo.norg
-{:ruta/archivo:}         # Enlace con ruta
-{https://ejemplo.com}    # Enlace web
+### Concealer no muestra iconos
+
+**Causa**:
+1. Parser no instalado
+2. Concealer aún comentado
+
+**Solución**:
+1. Instalar parser: `:Neorg sync-parsers`
+2. Descomentar `core.concealer` en `lua/plugins/neorg.lua`
+3. Recargar: `:source ~/.config/nvim/init.lua`
+
+### sync-parsers no funciona
+
+**Alternativa manual**:
+
+```bash
+cd ~/.local/share/nvim/lazy/neorg
+nvim -c "Neorg sync-parsers" -c "qa"
 ```
 
-### Formato de Texto
-```norg
-/Itálica/
-*Negrita*
-`Código`
+O reinstala Neorg:
+```vim
+:Lazy clean neorg
+:Lazy install
+:Neorg sync-parsers
 ```
 
-### Citas
-```norg
-> Esta es una cita
->> Cita anidada
+### Errores de image.nvim
+
+**Causa**: image.nvim intenta integrarse con Neorg sin parser.
+
+**Solución temporal**: El error es cosmético, ignóralo hasta que el parser esté instalado.
+
+**Solución permanente**: Deshabilitar integración image.nvim con Neorg:
+
+Edita `lua/plugins/image.lua` (si existe) y agrega:
+```lua
+integrations = {
+  neorg = {
+    enabled = false,
+  },
+},
 ```
 
-### Código
-```norg
-@code lang
-código aquí
-@end
+## 🔄 Workflow Recomendado
+
+### Primera vez:
+
+1. `:Neorg sync-parsers` (espera instalación)
+2. `:qa` (cerrar Neovim)
+3. `nvim` (reabrir)
+4. Descomentar `core.concealer` y `core.completion`
+5. `:Lazy sync`
+6. `:e ~/neorg/journal/index.norg` (verificar)
+
+### Uso diario:
+
+```vim
+<leader>njt    " Abrir journal de hoy
+<leader>nd     " Abrir workspace desarrollo
+<leader>nf     " Buscar archivos .norg
 ```
 
-## Troubleshooting
+## 📚 Documentación Completa
 
-### Parser No Se Instala
+- **NEORG_GUIDE.md**: Guía completa de uso, sintaxis, workflows
+- **KEYMAPS.md**: Todos los keymaps de Neorg
 
-Si `:Neorg sync-parsers` falla:
+## Estado del Setup
 
-1. Verifica que tienes las herramientas de compilación:
-   ```bash
-   xcode-select --install
-   ```
+```
+✅ Configuración de Neorg instalada
+✅ 4 workspaces configurados
+✅ Templates de journal creados
+✅ Índices pre-creados
+✅ Keymaps configurados
+⏸️  Parser pendiente (instalar con :Neorg sync-parsers)
+⏸️  Concealer deshabilitado (habilitar después de parser)
+⏸️  Completion deshabilitado (habilitar después de parser)
+```
 
-2. Reinstala Neorg:
-   ```vim
-   :Lazy clean neorg
-   :Lazy install neorg
-   :Neorg sync-parsers
-   ```
+## Próximo Paso
 
-3. Verifica logs:
-   ```vim
-   :messages
-   ```
+**Instala el parser ahora**:
 
-### Errors de Treesitter
+```vim
+:Neorg sync-parsers
+```
 
-Si ves errores de "Parser could not be created":
-- Asegúrate de que el parser se instaló: `:Neorg sync-parsers`
-- Verifica que nvim-treesitter está actualizado: `:Lazy update nvim-treesitter`
-- Revisa `:checkhealth neorg`
+Luego sigue las instrucciones de "Habilitar Módulos Completos" arriba.
 
-### Workspace No Encontrado
+---
 
-Si ves "attempt to index a nil value":
-- Asegúrate de que los directorios existen:
-  ```bash
-  mkdir -p ~/notes ~/work-notes
-  ```
-- Crea archivos index:
-  ```bash
-  touch ~/notes/index.norg ~/work-notes/index.norg
-  ```
-
-## Recursos
-
-- [Neorg Wiki](https://github.com/nvim-neorg/neorg/wiki)
-- [Neorg Tutorial](https://github.com/nvim-neorg/neorg/wiki/Tutorial)
-- [Sintaxis Norg](https://github.com/nvim-neorg/neorg/wiki/Norg-Syntax)
-
-## Estado Actual
-
-✅ Directorios creados: `~/notes`, `~/work-notes`
-✅ Archivos index creados
-✅ Configuración base instalada
-⚠️  Parser pendiente de instalación manual
-⚠️  Core.concealer deshabilitado temporalmente
-
-Una vez que ejecutes `:Neorg sync-parsers` exitosamente, podrás usar Neorg completamente.
+**Última actualización**: 2026-01-27
+**Ver también**: `NEORG_GUIDE.md` para guía de uso completa
