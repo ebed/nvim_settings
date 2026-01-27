@@ -11,7 +11,7 @@ return
 	cmd = { "OutputPanel" },
 	keys = {
 		{
-			"<leader>o",
+			"<leader>O",  -- Changed from <leader>o to avoid conflict with Obsidian mappings
 			vim.cmd.OutputPanel,
 			mode = "n",
 			desc = "Toggle the output panel",
