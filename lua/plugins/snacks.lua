@@ -139,7 +139,8 @@ widgets = {
           blend = 80,
         },
         win = {
-          width = 0.8,
+          width = 120,  -- Fixed width in columns instead of percentage
+          height = 0.9, -- 90% of screen height
         },
       },
     }
