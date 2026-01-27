@@ -88,7 +88,9 @@ widgets = {
       },
     },
     zen = {
-      enabled = true,  -- ✅ GRUPO 4: Enabled
+      enabled = false,  -- ❌ Disabled: causing window errors with nvim_open_win
+      -- Error: Invalid 'win': Expected Lua number
+      -- TODO: Debug or use alternative zen mode plugin
       toggles = {
         dim = true,
         git_signs = false,
@@ -204,7 +206,7 @@ widgets = {
     { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "LSP Symbols" },
     { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
     -- Other
-    { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },
+    -- { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },  -- Disabled: zen causing errors
     { "<leader>Z",  function() Snacks.zen.zoom() end, desc = "Toggle Zoom" },
     { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
     { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
