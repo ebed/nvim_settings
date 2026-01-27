@@ -29,10 +29,10 @@ widgets = {
     { section = "keys" },
   },
 },
-    -- explorer = {
-    --   enabled = true,
-    -- replace_netrw = true
-    -- },
+    explorer = {
+      enabled = true,  -- ✅ File explorer sidebar (replaces neotree)
+      replace_netrw = false,  -- Keep oil.nvim for netrw (they complement each other)
+    },
     indent = { enabled = false },  -- ❌ CULPRIT: Causes crash with lua files
     input = {
       enabled = true,  -- ✅ GRUPO 3: Enabled
@@ -151,7 +151,7 @@ widgets = {
     { "<leader>/", function() Snacks.picker.grep() end, desc = "Grep" },
     { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
     { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
-    -- { "<leader>e<space>", function() Snacks.explorer() end, desc = "File Explorer" },
+    { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer (Snacks)" },
     -- find
     { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
     { "<leader>fc", function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },
