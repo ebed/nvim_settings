@@ -150,66 +150,66 @@
 
 ---
 
-## 📝 Neorg (Notas y Bitácora)
+## 📝 Obsidian (Notas y Gestión de Conocimiento)
 
-**Leader de Neorg**: `<leader>n`
+**Leader de Obsidian**: `<leader>o`
+**Vault**: `~/Vault/`
 
-### Workspaces
-
-| Keymap | Acción | Descripción |
-|--------|--------|-------------|
-| `<leader>nw` | Select workspace | Selector de workspace |
-| `<leader>nd` | Workspace desarrollo | Notas técnicas y desarrollo |
-| `<leader>nj` | Workspace journal | Bitácora diaria |
-| `<leader>np` | Workspace proyectos | Documentación de proyectos |
-| `<leader>ni` | Workspace index | Abrir índice del workspace actual |
-| `<leader>nr` | Return | Volver al archivo anterior |
-
-### Journal / Bitácora Diaria
+### Quick Actions
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<leader>njt` | Today's journal | Crear/abrir entrada de HOY |
-| `<leader>njy` | Yesterday's journal | Abrir entrada de AYER |
-| `<leader>njm` | Tomorrow's journal | Crear entrada de MAÑANA |
-| `<leader>njc` | Custom date journal | Journal de fecha específica |
+| `<leader>on` | New note | Crear nueva nota |
+| `<leader>ot` | Today | Nota diaria de HOY |
+| `<leader>oy` | Yesterday | Nota de AYER |
+| `<leader>om` | Tomorrow | Nota de MAÑANA |
 
-### TODO Management
-
-| Keymap | Acción | Descripción |
-|--------|--------|-------------|
-| `<leader>nt` | Cycle TODO state | Ciclar entre estados (✗→○→✓→⊘) |
-| `<C-Space>` | Cycle TODO state | Ciclar entre estados (alternativa) |
-
-### Telescope Integration
+### Búsqueda y Navegación
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<leader>nf` | Find norg files | Buscar archivos .norg en ~/neorg |
-| `<leader>ns` | Search in files | Buscar contenido en archivos .norg |
-| `<leader>nl` | Search headings | Buscar headings (líneas con *) |
+| `<leader>of` | Quick switch | Buscar y abrir nota (Telescope) |
+| `<leader>os` | Search vault | Buscar contenido en todas las notas |
+| `<leader>ob` | Backlinks | Mostrar backlinks de nota actual |
+| `<leader>ol` | Follow link | Seguir link bajo el cursor |
 
-### Otros
+### Links y Referencias
+
+| Keymap | Modo | Acción | Descripción |
+|--------|------|--------|-------------|
+| `<leader>ok` | Normal/Visual | Link to note | Crear link a nota existente |
+| `<leader>oK` | Normal/Visual | Link new | Crear nota nueva y linkear |
+
+### Templates y Checkboxes
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<leader>ne` | Export to file | Exportar a markdown |
-| `<leader>nk` (visual) | Create link | Crear link desde selección |
-| `<C-d>` (insert) | Insert date | Insertar fecha (2026-01-27) |
-| `<C-t>` (insert) | Insert time | Insertar hora (14:30) |
+| `<leader>oT` | Insert template | Insertar template |
+| `<leader>oc` | Toggle checkbox | Toggle checkbox [ ] ↔ [x] |
+
+### Workspace
+
+| Keymap | Acción | Descripción |
+|--------|--------|-------------|
+| `<leader>oo` | Open in Obsidian | Abrir en Obsidian app |
+| `<leader>op` | Paste image | Pegar imagen del clipboard |
+| `<leader>or` | Rename note | Renombrar nota actual |
 
 ### Comandos
 
 ```vim
-:Neorg workspace           " Selector de workspace
-:Neorg workspace desarrollo " Abrir workspace específico
-:Neorg journal today       " Journal de hoy
-:Neorg index               " Abrir índice
-:Neorg export to-file      " Exportar a markdown
-:TSInstall norg            " Instalar parser de Neorg
+:ObsidianNew          " Nueva nota
+:ObsidianToday        " Nota de hoy
+:ObsidianYesterday    " Nota de ayer
+:ObsidianTomorrow     " Nota de mañana
+:ObsidianQuickSwitch  " Buscar nota
+:ObsidianSearch       " Buscar en vault
+:ObsidianBacklinks    " Ver backlinks
+:ObsidianTemplate     " Insertar template
+:ObsidianOpen         " Abrir en app
 ```
 
-**Ver guía completa**: `NEORG_GUIDE.md`
+**Ver guía completa**: `OBSIDIAN_GUIDE.md` en `~/.config/nvim/`
 
 ---
 
