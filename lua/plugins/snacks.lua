@@ -51,7 +51,7 @@ widgets = {
       margin = { top = 0, right = 1, bottom = 0 },
       padding = true,
       sort = { "level", "added" },
-      level = vim.log.levels.TRACE,
+      level = vim.log.levels.INFO,  -- Changed from TRACE to INFO (less noise)
       icons = {
         error = " ",
         warn = " ",
@@ -341,8 +341,24 @@ widgets = {
       end,
     })
 
-    -- Override vim.notify to use Snacks
+    -- Override vim.notify to use Snacks with filtering
     vim.notify = function(msg, level, opts)
+      -- Filter out noisy messages
+      if msg and type(msg) == "string" then
+        -- Suppress "No results" messages from pickers
+        if msg:match("No results found") then
+          return
+        end
+        -- Suppress "Command failed" from git operations (usually harmless)
+        if msg:match("Command failed:") and msg:match("git") then
+          return
+        end
+        -- Suppress "Opening" messages from gitbrowse
+        if msg:match("^Opening %[") then
+          return
+        end
+      end
+
       Snacks.notifier.notify(msg, vim.tbl_extend("force", {
         level = level or vim.log.levels.INFO,
       }, opts or {}))
