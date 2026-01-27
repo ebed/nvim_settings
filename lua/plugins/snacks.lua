@@ -299,18 +299,27 @@ widgets = {
           return
         end
 
-        -- Don't show generic "Complete" without context
-        if value.message == "Complete" and (not value.title or value.title == "") then
-          return
+        -- Build descriptive message
+        local title = client.name
+        local message = value.message or "Complete"
+
+        -- If message is generic "Complete", enhance it with title
+        if message == "Complete" and value.title and value.title ~= "" then
+          message = value.title .. " completed"
         end
 
-        local title = client.name
-        if value.title then
+        -- Add title to notification title for context
+        if value.title and value.title ~= "" then
           title = title .. " - " .. value.title
         end
 
-        -- Only show completion notification with short timeout
-        Snacks.notifier.notify(value.message or "Complete", {
+        -- Don't show if still too generic after enhancement
+        if message == "Complete" and (not value.title or value.title == "") then
+          return
+        end
+
+        -- Show completion notification with short timeout
+        Snacks.notifier.notify(message, {
           id = "lsp_progress_" .. client.id,
           title = title,
           level = "info",
