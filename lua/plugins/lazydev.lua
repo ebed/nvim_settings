@@ -1,6 +1,7 @@
 return {
   {
     "folke/lazydev.nvim",
+    enabled = false, -- Temporarily disabled to debug crashes
     ft = "lua", -- only load on lua files
     opts = {
       library = {

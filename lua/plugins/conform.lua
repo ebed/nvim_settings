@@ -1,5 +1,6 @@
 return {
   "stevearc/conform.nvim",
+  enabled = false, -- Temporarily disabled to debug crashes
   event = { "BufWritePre" },
   cmd = { "ConformInfo" },
   opts = {},

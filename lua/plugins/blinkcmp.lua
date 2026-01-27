@@ -1,5 +1,6 @@
 return {
   'saghen/blink.cmp',
+  enabled = false, -- Temporarily disabled to debug crashes
   -- optional: provides snippets for the snippet source
   dependencies = { 'rafamadriz/friendly-snippets' },
 

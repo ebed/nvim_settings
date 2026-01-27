@@ -19,12 +19,16 @@ return {
         "elixir",
         "heex",
         "eex", -- Lenguajes para Elixir
+        "markdown", -- Instalado pero deshabilitado en highlight
+        "markdown_inline",
       },
       sync_install = true,
       auto_install = true,
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
+        -- Disable treesitter for markdown to avoid ugly backgrounds
+        disable = { "markdown", "markdown_inline" },
       },
       indent = { enable = true },
     })

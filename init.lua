@@ -5,6 +5,9 @@ vim.opt.shellcmdflag = "-c"
 vim.cmd("autocmd User TelescopePreviewerLoaded setlocal number")
 vim.g.loaded_perl_provider = 0
 require("config.lazy")
+-- Fix markdown colors (remove red backgrounds)
+-- Temporarily disabled to debug crashes
+-- require("config.markdown_colors").setup()
 require("config.basics")
 require("config.cmp")
 require("config.dap")

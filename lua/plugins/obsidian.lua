@@ -5,6 +5,23 @@ return {
   version = "*",
   lazy = true,
   ft = "markdown",
+  cmd = {
+    "ObsidianOpen",
+    "ObsidianNew",
+    "ObsidianQuickSwitch",
+    "ObsidianFollowLink",
+    "ObsidianBacklinks",
+    "ObsidianToday",
+    "ObsidianYesterday",
+    "ObsidianTomorrow",
+    "ObsidianTemplate",
+    "ObsidianSearch",
+    "ObsidianLink",
+    "ObsidianLinkNew",
+    "ObsidianWorkspace",
+    "ObsidianPasteImg",
+    "ObsidianRename",
+  },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "hrsh7th/nvim-cmp",
@@ -75,13 +92,17 @@ return {
 
     -- Follow link behavior
     follow_url_func = function(url)
-      -- Open URL in browser
-      vim.fn.jobstart({"open", url})
+      -- Open URL in browser (only for http/https URLs)
+      if url:match("^https?://") then
+        vim.fn.jobstart({"open", url})
+      else
+        vim.notify("URL no es http/https: " .. url, vim.log.levels.WARN)
+      end
     end,
 
     -- UI settings
     ui = {
-      enable = true,
+      enable = false,  -- Disable UI rendering to avoid colored backgrounds
       update_debounce = 200,
       checkboxes = {
         [" "] = { char = "󰄱", hl_group = "ObsidianTodo" },
@@ -160,7 +181,20 @@ return {
         map("n", "<leader>oT", "<cmd>ObsidianTemplate<cr>", vim.tbl_extend("force", bufopts, { desc = "Insert template" }))
 
         -- Workspace
-        map("n", "<leader>oo", "<cmd>ObsidianOpen<cr>", vim.tbl_extend("force", bufopts, { desc = "Open in Obsidian app" }))
+        map("n", "<leader>oo", function()
+          -- Check if Obsidian app is installed
+          local obsidian_app = "/Applications/Obsidian.app"
+          if vim.fn.isdirectory(obsidian_app) == 1 then
+            vim.cmd("ObsidianOpen")
+          else
+            vim.notify(
+              "Obsidian app no está instalada en /Applications/\n" ..
+              "Puedes descargarla de: https://obsidian.md/download\n" ..
+              "O simplemente usar Neovim para editar tus notas markdown.",
+              vim.log.levels.WARN
+            )
+          end
+        end, vim.tbl_extend("force", bufopts, { desc = "Open in Obsidian app (if installed)" }))
         map("n", "<leader>op", "<cmd>ObsidianPasteImg<cr>", vim.tbl_extend("force", bufopts, { desc = "Paste image from clipboard" }))
 
         -- TODO toggle
