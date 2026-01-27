@@ -84,27 +84,11 @@ return {
           },
         },
 
-        -- Integrate with telescope
-        ["core.integrations.telescope"] = {},
-
         -- Summary/index generation
         ["core.summary"] = {},
 
         -- TODO/GTD integration
-        ["core.qol.todo_items"] = {
-          config = {
-            -- Create contexts for todos
-            create_todo_items = true,
-            create_todo_parents = true,
-          },
-        },
-
-        -- Presenter mode
-        ["core.presenter"] = {
-          config = {
-            zen_mode = "zen-mode",
-          },
-        },
+        ["core.qol.todo_items"] = {},
 
         -- Text objects for easy navigation
         ["core.itero"] = {},
@@ -142,16 +126,34 @@ return {
         map("n", "<leader>ni", "<cmd>Neorg index<cr>", vim.tbl_extend("force", opts, { desc = "Open workspace index" }))
         map("n", "<leader>nr", "<cmd>Neorg return<cr>", vim.tbl_extend("force", opts, { desc = "Return to previous file" }))
 
-        -- TODO management
-        map("n", "<leader>ntd", "<cmd>Neorg keybind norg core.qol.todo_items.todo.task_done<cr>", vim.tbl_extend("force", opts, { desc = "Mark TODO done" }))
-        map("n", "<leader>ntu", "<cmd>Neorg keybind norg core.qol.todo_items.todo.task_undone<cr>", vim.tbl_extend("force", opts, { desc = "Mark TODO undone" }))
-        map("n", "<leader>ntp", "<cmd>Neorg keybind norg core.qol.todo_items.todo.task_pending<cr>", vim.tbl_extend("force", opts, { desc = "Mark TODO pending" }))
-        map("n", "<leader>ntc", "<cmd>Neorg keybind norg core.qol.todo_items.todo.task_cancelled<cr>", vim.tbl_extend("force", opts, { desc = "Cancel TODO" }))
+        -- TODO management (use <C-Space> to cycle TODO states)
+        map("n", "<leader>nt", "<C-Space>", vim.tbl_extend("force", opts, { desc = "Cycle TODO state" }))
 
-        -- Telescope integration
-        map("n", "<leader>nf", "<cmd>Telescope neorg find_norg_files<cr>", vim.tbl_extend("force", opts, { desc = "Find norg files" }))
-        map("n", "<leader>ns", "<cmd>Telescope neorg search_headings<cr>", vim.tbl_extend("force", opts, { desc = "Search headings" }))
-        map("n", "<leader>nl", "<cmd>Telescope neorg find_linkable<cr>", vim.tbl_extend("force", opts, { desc = "Find linkable" }))
+        -- Telescope integration (using standard Telescope)
+        map("n", "<leader>nf", function()
+          require('telescope.builtin').find_files({
+            cwd = vim.fn.expand("~/neorg"),
+            prompt_title = "Find Norg Files",
+            find_command = { "rg", "--files", "--glob", "*.norg" }
+          })
+        end, vim.tbl_extend("force", opts, { desc = "Find norg files" }))
+
+        map("n", "<leader>ns", function()
+          require('telescope.builtin').live_grep({
+            cwd = vim.fn.expand("~/neorg"),
+            prompt_title = "Search in Norg Files",
+            glob_pattern = "*.norg"
+          })
+        end, vim.tbl_extend("force", opts, { desc = "Search in norg files" }))
+
+        map("n", "<leader>nl", function()
+          require('telescope.builtin').live_grep({
+            cwd = vim.fn.expand("~/neorg"),
+            prompt_title = "Search Norg Headings",
+            glob_pattern = "*.norg",
+            default_text = "^\\*+ "
+          })
+        end, vim.tbl_extend("force", opts, { desc = "Search norg headings" }))
 
         -- Export
         map("n", "<leader>ne", "<cmd>Neorg export to-file<cr>", vim.tbl_extend("force", opts, { desc = "Export to file" }))

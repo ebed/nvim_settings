@@ -178,19 +178,16 @@
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<leader>ntd` | TODO done | Marcar como completado ✓ |
-| `<leader>ntu` | TODO undone | Marcar como no completado ✗ |
-| `<leader>ntp` | TODO pending | Marcar como pendiente ○ |
-| `<leader>ntc` | TODO cancelled | Cancelar TODO ⊘ |
-| `<C-Space>` | Cycle TODO state | Ciclar entre estados |
+| `<leader>nt` | Cycle TODO state | Ciclar entre estados (✗→○→✓→⊘) |
+| `<C-Space>` | Cycle TODO state | Ciclar entre estados (alternativa) |
 
 ### Telescope Integration
 
 | Keymap | Acción | Descripción |
 |--------|--------|-------------|
-| `<leader>nf` | Find norg files | Buscar archivos .norg |
-| `<leader>ns` | Search headings | Buscar en títulos |
-| `<leader>nl` | Find linkable | Buscar elementos linkables |
+| `<leader>nf` | Find norg files | Buscar archivos .norg en ~/neorg |
+| `<leader>ns` | Search in files | Buscar contenido en archivos .norg |
+| `<leader>nl` | Search headings | Buscar headings (líneas con *) |
 
 ### Otros
 

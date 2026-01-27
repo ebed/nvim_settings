@@ -83,20 +83,18 @@ Guía completa de uso de Neorg para workflow de desarrollo y bitácora diaria.
 
 | Keymap | Acción |
 |--------|--------|
-| `<leader>ntd` | Marcar TODO como **done** ✓ |
-| `<leader>ntu` | Marcar TODO como **undone** ✗ |
-| `<leader>ntp` | Marcar TODO como **pending** ○ |
-| `<leader>ntc` | Marcar TODO como **cancelled** ⊘ |
+| `<leader>nt` | Ciclar TODO states (✗→○→✓→⊘) |
+| `<C-Space>` | Ciclar TODO states (alternativa) |
 
-**Ciclar estados**: `<C-Space>` (en la línea del TODO)
+**Ciclar estados**: Usa `<leader>nt` o `<C-Space>` en la línea del TODO
 
 ### Telescope
 
 | Keymap | Acción |
 |--------|--------|
 | `<leader>nf` | **Buscar** archivos .norg |
-| `<leader>ns` | **Buscar** headings (títulos) |
-| `<leader>nl` | **Buscar** linkables |
+| `<leader>ns` | **Buscar** contenido en archivos .norg |
+| `<leader>nl` | **Buscar** headings (líneas que empiezan con *) |
 
 ### Otros
 
