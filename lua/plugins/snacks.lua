@@ -265,8 +265,8 @@ widgets = {
       end,
     })
 
-    -- LSP Progress Integration
-    -- Show LSP progress as notifications (filtered for noisy servers)
+    -- LSP Progress Integration - Heavily Filtered
+    -- Only show final completion messages, suppress all intermediate progress
     vim.api.nvim_create_autocmd("LspProgress", {
       callback = function(ev)
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
@@ -275,16 +275,33 @@ widgets = {
           return
         end
 
-        -- Filter out JDTLS noisy progress messages
-        if client.name == "jdtls" then
-          -- Only show JDTLS completion messages, not building/validating
-          if value.message and (
-            value.message:match("^Building") or
-            value.message:match("^Validate") or
-            value.message:match("^Publish Diagnostics")
-          ) then
-            return -- Suppress noisy JDTLS messages
+        -- Suppress ALL progress messages for noisy servers
+        if client.name == "jdtls" or client.name == "lua_ls" or client.name == "rust_analyzer" then
+          -- Only show final completion for these noisy servers
+          if value.kind ~= "end" then
+            return
           end
+
+          -- And only if it's a significant operation
+          if not value.title or value.title == "" then
+            return
+          end
+        end
+
+        -- For all servers: only show "end" messages (completion)
+        -- Suppress "begin" and "report" (progress updates)
+        if value.kind ~= "end" then
+          return
+        end
+
+        -- Don't show messages with just numbers (e.g., "4732/4732")
+        if value.message and value.message:match("^%d+/%d+$") then
+          return
+        end
+
+        -- Don't show generic "Complete" without context
+        if value.message == "Complete" and (not value.title or value.title == "") then
+          return
         end
 
         local title = client.name
@@ -292,25 +309,13 @@ widgets = {
           title = title .. " - " .. value.title
         end
 
-        -- Only show notifications for significant progress
-        if value.kind == "end" or value.percentage and value.percentage >= 90 then
-          Snacks.notifier.notify(value.message or "Complete", {
-            id = "lsp_progress_" .. client.id,
-            title = title,
-            level = "info",
-            timeout = 1000,
-          })
-        elseif value.kind == "begin" then
-          -- Don't show "begin" for JDTLS at all
-          if client.name ~= "jdtls" then
-            Snacks.notifier.notify(value.message or "Starting...", {
-              id = "lsp_progress_" .. client.id,
-              title = title,
-              level = "info",
-              timeout = false, -- Keep until completion
-            })
-          end
-        end
+        -- Only show completion notification with short timeout
+        Snacks.notifier.notify(value.message or "Complete", {
+          id = "lsp_progress_" .. client.id,
+          title = title,
+          level = "info",
+          timeout = 2000,  -- 2 seconds
+        })
       end,
     })
 
