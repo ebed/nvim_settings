@@ -10,6 +10,10 @@ widgets = {
       enabled = true  -- ✅ GRUPO 4: Enabled
 },
     bigfile = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    lazygit = {
+      enabled = true,  -- ✅ Git TUI integration
+      configure = true,  -- Use snacks config
+    },
     dashboard = {
       enabled = true,  -- ✅ GRUPO 4: Enabled
   formats = {
