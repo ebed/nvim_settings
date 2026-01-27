@@ -1,5 +1,6 @@
 return {
 	dir = "/Users/ralbertomerinocolipe/workspaces/personal/nvim/GitAssist",
+	enabled = false,  -- Duplicated with lazygit - keeping lazygit only
 	config = function()
 		require('gitassist').setup({
   -- Plugin settings

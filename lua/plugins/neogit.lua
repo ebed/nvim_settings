@@ -1,5 +1,6 @@
 return {
   "NeogitOrg/neogit",
+  enabled = false,  -- Duplicated with lazygit - keeping lazygit only
   dependencies = {
     "nvim-lua/plenary.nvim",         -- required
     "sindrets/diffview.nvim",        -- optional - Diff integration

@@ -1,5 +1,6 @@
 return {
   "akinsho/toggleterm.nvim",
+  enabled = false,  -- Duplicated with snacks.terminal - keeping snacks.terminal
   version = "*",
   config = function()
     require("toggleterm").setup({

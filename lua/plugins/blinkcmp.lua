@@ -1,5 +1,6 @@
 return {
   'saghen/blink.cmp',
+  enabled = false,  -- Duplicated with nvim-cmp - keeping nvim-cmp
   -- optional: provides snippets for the snippet source
   dependencies = { 'rafamadriz/friendly-snippets' },
 
