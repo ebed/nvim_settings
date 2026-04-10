@@ -5,7 +5,7 @@ return {
       require("bufferline").setup{
         options = {
           mode = "buffers",            -- opciones: buffers o tabs
-          numbers = "none",
+          numbers = "buffer_id",
           close_command = "bdelete! %d", -- comando para cerrar buffer
           indicator = {
             icon = "▎",
@@ -21,7 +21,7 @@ return {
           diagnostics = "nvim_lsp",
           offsets = {
             {
-              filetype = "Neotree",
+              filetype = "neo-tree",
               text = "File Explorer",
               padding = 1,
             },

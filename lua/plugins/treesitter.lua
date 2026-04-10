@@ -1,48 +1,38 @@
 return {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    config = function ()
-      local configs = require("nvim-treesitter.configs")
-      configs.setup({
-          ensure_installed = { "bash",
-              "c",
-              "javascript",
-                "regex",
-                "diff",
-              "json",
-              "lua",
-              "python",
-              "typescript",
-              "tsx",
-              "css",
-              "rust",
-              "ruby",
-              "java",
-              "yaml"
-          },
-          sync_install = false,
-          highlight = { enable = true },
-          indent = { enable = true },
-          auto_install = true,
-          modules = {},
-          ignore_install = {},
-          rainbow = {
-            enable = true,
-            extended_mode = true, -- También se resaltan otros delimitadores además de paréntesis.
-            max_file_lines = nil, -- Se desactiva la limitación para archivos muy grandes.
-            -- Opcional: define una lista de colores personalizados para los delimitadores.
-            colors = {
-              "#cc241d", -- Rojo
-              "#d79921", -- Amarillo
-              "#458588", -- Azul
-              "#b16286", -- Violeta
-              "#689d6a", -- Verde
-              "#7c6f64", -- Gris
-              "#d65d0e"  -- Naranja
-            },
-        }
-     })
-     -- Activa el resaltado sintáctico basado en Treesitter.
-     -- Configuración del plugin nvim-ts-rainbow para obtener colores en los delimitadores.
-    end
- }
+  "nvim-treesitter/nvim-treesitter",
+  version = false, -- Usar la última versión
+  build = ":TSUpdate",
+  config = function()
+    require("nvim-treesitter").setup({
+      ensure_installed = {
+        "lua",
+        "vim",
+        "vimdoc",
+        "query",
+        "javascript",
+        "typescript",
+        "json",
+        "ruby",
+        "java",
+        "yaml",
+        "http",
+        "elixir",
+        "heex",
+        "eex", -- Lenguajes para Elixir
+        "markdown", -- Instalado pero deshabilitado en highlight
+        "markdown_inline",
+      },
+      sync_install = true,
+      auto_install = true,
+      highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+        -- Disable treesitter for markdown to avoid ugly backgrounds
+        disable = { "markdown", "markdown_inline" },
+      },
+      indent = { enable = true },
+    })
+  end,
+  priority = 1000, -- Alta prioridad para asegurar que TreeSitter esté disponible para otros plugins
+  dependencies = {}, -- Sin dependencias para evitar ciclos
+}

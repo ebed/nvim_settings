@@ -1,44 +1,64 @@
 return {
   "folke/snacks.nvim",
+  enabled = true, -- Re-enabled with minimal config to find problematic module
   priority = 1000,
   lazy = false,
   ---@type snacks.Config
   opts = {
-      
+
 widgets = {
-      enabled = true
+      enabled = true  -- ✅ GRUPO 4: Enabled
 },
-    bigfile = { enabled = true },
-    dashboard = { 
-      enabled = true,
+    bigfile = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    lazygit = {
+      enabled = true,  -- ✅ Git TUI integration
+      configure = true,  -- Use snacks config
+    },
+    dashboard = {
+      enabled = true,  -- ✅ GRUPO 4: Enabled
   formats = {
     key = function(item)
       return { { "[", hl = "special" }, { item.key, hl = "key" }, { "]", hl = "special" } }
     end,
   },
   sections = {
-    { section = "terminal", cmd = "fortune -s | cowsay", hl = "header", padding = 1, indent = 8 },
-    { title = "MRU", padding = 1 },
+    { title = "Recent Files", padding = 1 },
     { section = "recent_files", limit = 8, padding = 1 },
-    { title = "MRU ", file = vim.fn.fnamemodify(".", ":~"), padding = 1 },
-    { section = "recent_files", cwd = true, limit = 8, padding = 1 },
-    { title = "Sessions", padding = 1 },
-    { section = "projects", padding = 1 },
-    { title = "Bookmarks", padding = 1 },
-    { section = "keys" },
+    { title = "Projects", padding = 1 },
+    { section = "projects", limit = 8, padding = 1 },
+    { title = "Keymaps", padding = 1 },
+    { section = "keys", padding = 1 },
   },
 },
-    -- explorer = {
-    --   enabled = true,
-    -- replace_netrw = true
-    -- },
-    indent = { enabled = true },
-    input = { enabled = true },
-    notifier = {
-      enabled = true,
-      timeout = 3000,
+    explorer = {
+      enabled = true,  -- ✅ File explorer sidebar (replaces neotree)
+      replace_netrw = false,  -- Keep oil.nvim for netrw (they complement each other)
     },
-    picker = { enabled = true,
+    indent = { enabled = false },  -- ❌ CULPRIT: Causes crash with lua files
+    input = {
+      enabled = true,  -- ✅ GRUPO 3: Enabled
+      -- Mejora la visualización de input/prompts
+      border = "rounded",
+    },
+    notifier = {
+      enabled = true,  -- ✅ GRUPO 3: Enabled
+      timeout = 3000,
+      width = { min = 40, max = 0.4 },
+      height = { min = 1, max = 0.6 },
+      margin = { top = 0, right = 1, bottom = 0 },
+      padding = true,
+      sort = { "level", "added" },
+      level = vim.log.levels.INFO,  -- Changed from TRACE to INFO (less noise)
+      icons = {
+        error = " ",
+        warn = " ",
+        info = " ",
+        debug = " ",
+        trace = " ",
+      },
+      style = "compact",
+    },
+    picker = { enabled = true,  -- ✅ GRUPO 3: Enabled
     sources = {
         explorer = {
           -- your explorer picker configuration comes here
@@ -46,23 +66,86 @@ widgets = {
         }
       }
     },
-    quickfile = { enabled = true },
-    scope = { enabled = true },
-    scroll = { enabled = true },
-    statuscolumn = { enabled = true },
-    words = { enabled = true },
+    quickfile = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    scope = { enabled = true },  -- 🧪 TESTING: scope + statuscolumn
+    scroll = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    statuscolumn = { enabled = true },  -- 🧪 TESTING: scope + statuscolumn
+    words = { enabled = true },  -- ✅ GRUPO 1: Enabled
+    terminal = {
+      enabled = true,  -- ✅ GRUPO 4: Enabled
+      win = {
+        position = "float",
+        border = "rounded",
+        width = 0.8,
+        height = 0.8,
+      },
+    },
+    scratch = {
+      enabled = true,  -- ✅ GRUPO 4: Enabled
+      win = {
+        border = "rounded",
+        width = 0.8,
+        height = 0.8,
+      },
+    },
+    zen = {
+      enabled = false,  -- ❌ Disabled: causing window errors with nvim_open_win
+      -- Error: Invalid 'win': Expected Lua number
+      -- TODO: Debug or use alternative zen mode plugin
+      toggles = {
+        dim = true,
+        git_signs = false,
+        mini_diff_signs = false,
+      },
+      zoom = {
+        toggles = {},
+      },
+    },
     styles = {
       blame_line = {
-  width = 0.6,
-  height = 0.6,
-  border = "rounded",
-  title = " Git Blame ",
-  title_pos = "center",
-  ft = "git",
-},
+        width = 0.6,
+        height = 0.6,
+        border = "rounded",
+        title = " Git Blame ",
+        title_pos = "center",
+        ft = "git",
+      },
       notification = {
-        -- wo = { wrap = true } -- Wrap notifications
-      }
+        wo = { wrap = true },
+        border = "rounded",
+      },
+      notification_history = {
+        border = "rounded",
+        zindex = 100,
+      },
+      input = {
+        border = "rounded",
+        title_pos = "center",
+        relative = "editor",
+        row = "50%",
+        col = "50%",
+      },
+      scratch = {
+        border = "rounded",
+        title = " Scratch Buffer ",
+        title_pos = "center",
+        ft = "markdown",
+      },
+      terminal = {
+        border = "rounded",
+        title = " Terminal ",
+        title_pos = "center",
+      },
+      zen = {
+        backdrop = {
+          transparent = false,
+          blend = 80,
+        },
+        win = {
+          width = 120,  -- Fixed width in columns instead of percentage
+          height = 0.9, -- 90% of screen height
+        },
+      },
     }
   },
   keys = {
@@ -72,7 +155,13 @@ widgets = {
     { "<leader>/", function() Snacks.picker.grep() end, desc = "Grep" },
     { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
     { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
-    -- { "<leader>e<space>", function() Snacks.explorer() end, desc = "File Explorer" },
+    { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer (Snacks)" },
+    { "<leader>E", function()
+      -- Open Oil in current file's directory
+      local current_file = vim.api.nvim_buf_get_name(0)
+      local current_dir = vim.fn.fnamemodify(current_file, ":h")
+      require("oil").open(current_dir)
+    end, desc = "Open Oil in current directory" },
     -- find
     { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
     { "<leader>fc", function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },
@@ -124,7 +213,7 @@ widgets = {
     { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "LSP Symbols" },
     { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
     -- Other
-    { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },
+    -- { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },  -- Disabled: zen causing errors
     { "<leader>Z",  function() Snacks.zen.zoom() end, desc = "Toggle Zoom" },
     { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
     { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
@@ -158,6 +247,7 @@ widgets = {
     }
   },
   init = function()
+    -- ✅ GRUPO 5: Full init restored
     vim.api.nvim_create_autocmd("User", {
       pattern = "VeryLazy",
       callback = function()
@@ -180,9 +270,95 @@ widgets = {
         Snacks.toggle.treesitter():map("<leader>uT")
         Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
         Snacks.toggle.inlay_hints():map("<leader>uh")
-        Snacks.toggle.indent():map("<leader>ug")
+        -- Snacks.toggle.indent():map("<leader>ug")  -- ❌ Disabled: indent causes crashes
         Snacks.toggle.dim():map("<leader>uD")
       end,
     })
+
+    -- LSP Progress Integration - Heavily Filtered
+    -- Only show final completion messages, suppress all intermediate progress
+    vim.api.nvim_create_autocmd("LspProgress", {
+      callback = function(ev)
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        local value = ev.data.params.value
+        if not client or type(value) ~= "table" then
+          return
+        end
+
+        -- Suppress ALL progress messages for noisy servers
+        if client.name == "jdtls" or client.name == "lua_ls" or client.name == "rust_analyzer" then
+          -- Only show final completion for these noisy servers
+          if value.kind ~= "end" then
+            return
+          end
+
+          -- And only if it's a significant operation
+          if not value.title or value.title == "" then
+            return
+          end
+        end
+
+        -- For all servers: only show "end" messages (completion)
+        -- Suppress "begin" and "report" (progress updates)
+        if value.kind ~= "end" then
+          return
+        end
+
+        -- Don't show messages with just numbers (e.g., "4732/4732")
+        if value.message and value.message:match("^%d+/%d+$") then
+          return
+        end
+
+        -- Build descriptive message
+        local title = client.name
+        local message = value.message or "Complete"
+
+        -- If message is generic "Complete", enhance it with title
+        if message == "Complete" and value.title and value.title ~= "" then
+          message = value.title .. " completed"
+        end
+
+        -- Add title to notification title for context
+        if value.title and value.title ~= "" then
+          title = title .. " - " .. value.title
+        end
+
+        -- Don't show if still too generic after enhancement
+        if message == "Complete" and (not value.title or value.title == "") then
+          return
+        end
+
+        -- Show completion notification with short timeout
+        Snacks.notifier.notify(message, {
+          id = "lsp_progress_" .. client.id,
+          title = title,
+          level = "info",
+          timeout = 2000,  -- 2 seconds
+        })
+      end,
+    })
+
+    -- Override vim.notify to use Snacks with filtering
+    vim.notify = function(msg, level, opts)
+      -- Filter out noisy messages
+      if msg and type(msg) == "string" then
+        -- Suppress "No results" messages from pickers
+        if msg:match("No results found") then
+          return
+        end
+        -- Suppress "Command failed" from git operations (usually harmless)
+        if msg:match("Command failed:") and msg:match("git") then
+          return
+        end
+        -- Suppress "Opening" messages from gitbrowse
+        if msg:match("^Opening %[") then
+          return
+        end
+      end
+
+      Snacks.notifier.notify(msg, vim.tbl_extend("force", {
+        level = level or vim.log.levels.INFO,
+      }, opts or {}))
+    end
   end,
 }
