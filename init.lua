@@ -1,6 +1,7 @@
+vim.opt.runtimepath:append("/opt/homebrew/opt/fzf")
 require("config.base_settings")
 vim.cmd("colorscheme desert")
-vim.opt.shell = "bash"
+vim.opt.shell = "zsh"
 vim.opt.shellcmdflag = "-c"
 vim.cmd("autocmd User TelescopePreviewerLoaded setlocal number")
 vim.g.loaded_perl_provider = 0
@@ -21,7 +22,7 @@ require("config.lspconfig")
 require("config.jdtls_fixes")
 -- Sistema de mantenimiento de caché para evitar errores ENOSPC
 require("utils.cache_maintenance").setup()
-
+require("custom_plugin.dataview-render").setup()
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "json" },
   callback = function()
@@ -39,3 +40,8 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     end
   end,
 })
+
+-- Comandos Ruby
+require("config.ruby_check")
+require("config.ruby_format")
+

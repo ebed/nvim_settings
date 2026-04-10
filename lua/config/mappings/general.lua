@@ -1,9 +1,10 @@
 -- General keymaps: navigation, save, quit, buffers, windows
 -- Basic Vim operations and navigation
 
--- Emacs-style navigation in all modes
-vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<C-A>", "<Home>")
-vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<C-E>", "<End>")
+-- Emacs-style navigation - Moved to Alt to free Ctrl for Colemak-DH
+-- <C-E> needed for Colemak-DH window navigation (↑)
+vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<M-a>", "<Home>", { desc = "Go to line start (Alt+a)" })
+vim.keymap.set({ "n", "v", "s", "o", "i", "c" }, "<M-e>", "<End>", { desc = "Go to line end (Alt+e)" })
 
 -- Quick save and quit
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })

@@ -43,7 +43,7 @@ return {
       folder = "daily",
       date_format = "%Y-%m-%d",
       alias_format = "%B %-d, %Y",
-      template = "daily.md",
+      -- template = nil, -- Deshabilitado: Templater maneja los templates automáticamente
     },
 
     -- Templates

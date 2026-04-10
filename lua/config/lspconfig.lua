@@ -32,11 +32,12 @@ vim.diagnostic.config({
   update_in_insert = false,
   severity_sort = true,
 })
--- Helper para detectar si usar Bundler
+-- Helper para ruby-lsp
+-- Si hay Gemfile.lock, usa bundle exec (ruby-lsp en Gemfile)
+-- Sino, usa versión global
 local function ruby_cmd()
   local uv = vim.uv or vim.loop
-  local in_bundle = uv.fs_stat("Gemfile.lock") ~= nil
-  if in_bundle and vim.fn.executable("bundle") == 1 then
+  if uv.fs_stat("Gemfile.lock") ~= nil and vim.fn.executable("bundle") == 1 then
     return { "bundle", "exec", "ruby-lsp" }
   end
   return { "ruby-lsp" }
@@ -81,12 +82,16 @@ end
 local server_configs = {
   ruby_lsp = {
     cmd = ruby_cmd(),
-    filetypes = { "ruby" },
+    filetypes = { "ruby", "eruby" },
     root_dir = function(bufnr)
-      return vim.fs.root(bufnr, { ".git", "Gemfile", ".ruby-version" }) or vim.fn.getcwd()
+      local root = vim.fs.root(bufnr, { ".git", "Gemfile", ".ruby-version" })
+      if not root then
+        root = vim.fn.getcwd()
+      end
+      return root
     end,
     init_options = {
-      formatter = "auto", -- usa rubocop si está el plugin; si no, syntax_tree
+      formatter = "rubocop",
     },
     settings = {},
   },
@@ -143,12 +148,64 @@ local server_configs = {
 
 -- Registro y enable (SIN lspconfig para evitar duplicados)
 for name, cfg in pairs(server_configs) do
-  vim.lsp.config(
-    name,
-    vim.tbl_deep_extend("force", {
+  if name ~= "ruby_lsp" then
+    -- Otros LSPs usan el método normal
+    vim.lsp.config(
+      name,
+      vim.tbl_deep_extend("force", {
+        capabilities = capabilities,
+        on_attach = on_attach,
+      }, cfg)
+    )
+    vim.lsp.enable(name)
+  end
+end
+
+-- Ruby LSP: inicio automático con FileType
+-- Track de buffers procesados para evitar duplicados
+local ruby_lsp_initialized = {}
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "ruby", "eruby" },
+  callback = function(ev)
+    local bufnr = ev.buf
+
+    -- Evitar duplicados - verificar si ya procesamos este buffer
+    if ruby_lsp_initialized[bufnr] then
+      return
+    end
+    ruby_lsp_initialized[bufnr] = true
+
+    -- Verificar si ya hay un cliente ruby_lsp en este buffer
+    local clients = vim.lsp.get_clients({ name = "ruby_lsp", bufnr = bufnr })
+    if #clients > 0 then
+      return
+    end
+
+    -- Detectar root del proyecto
+    local root = vim.fs.root(bufnr, { ".git", "Gemfile", ".ruby-version" }) or vim.fn.getcwd()
+    local cmd = ruby_cmd()
+
+    -- Iniciar ruby_lsp
+    vim.lsp.start({
+      name = "ruby_lsp",
+      cmd = cmd,
+      filetypes = { "ruby", "eruby" },
+      root_dir = root,
       capabilities = capabilities,
       on_attach = on_attach,
-    }, cfg)
-  )
-  vim.lsp.enable(name)
-end
+      init_options = {
+        formatter = "rubocop",
+      },
+    })
+
+    -- Limpiar tracking cuando se cierra el buffer
+    vim.api.nvim_create_autocmd("BufDelete", {
+      buffer = bufnr,
+      once = true,
+      callback = function()
+        ruby_lsp_initialized[bufnr] = nil
+      end,
+    })
+  end,
+})
